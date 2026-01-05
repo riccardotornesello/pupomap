@@ -29,6 +29,7 @@ export async function PUT(
 ) {
   try {
     // Check for admin authentication
+    // Note: In production, use HTTPS and consider implementing proper session tokens
     const adminPassword = request.headers.get("x-admin-password")
     if (adminPassword !== process.env.ADMIN_PASSWORD) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -59,6 +60,7 @@ export async function DELETE(
 ) {
   try {
     // Check for admin authentication
+    // Note: In production, use HTTPS and consider implementing proper session tokens
     const adminPassword = request.headers.get("x-admin-password")
     if (adminPassword !== process.env.ADMIN_PASSWORD) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

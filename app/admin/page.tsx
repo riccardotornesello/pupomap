@@ -29,8 +29,26 @@ export default function AdminDashboard() {
       router.push("/admin/login")
       return
     }
-    setAdminPassword(password)
-    fetchPupi()
+    
+    // Validate password with server
+    fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          localStorage.removeItem("adminPassword")
+          router.push("/admin/login")
+          return
+        }
+        setAdminPassword(password)
+        fetchPupi()
+      })
+      .catch(() => {
+        localStorage.removeItem("adminPassword")
+        router.push("/admin/login")
+      })
   }, [router])
 
   const fetchPupi = async () => {

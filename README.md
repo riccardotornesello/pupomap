@@ -77,6 +77,12 @@ The application includes an admin backoffice system for managing pupi:
   - View all pupi in a table format
 - All changes are persisted to a JSON file in the `data/` directory
 
+**Security Note:** The current implementation uses a simple password-based authentication suitable for single-admin use cases. For production deployments:
+- Always use HTTPS to encrypt credentials in transit
+- Consider implementing proper session management with JWT tokens
+- Regularly rotate the admin password
+- Consider adding rate limiting to prevent brute-force attacks
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

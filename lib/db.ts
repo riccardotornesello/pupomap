@@ -79,8 +79,13 @@ function initializePupiData() {
 
 export function getAllPupi(): PupoLocation[] {
   initializePupiData()
-  const data = fs.readFileSync(PUPI_FILE, "utf-8")
-  return JSON.parse(data)
+  try {
+    const data = fs.readFileSync(PUPI_FILE, "utf-8")
+    return JSON.parse(data)
+  } catch (error) {
+    console.error("Error reading pupi data:", error)
+    return []
+  }
 }
 
 export function getPupoById(id: string): PupoLocation | undefined {
@@ -90,9 +95,11 @@ export function getPupoById(id: string): PupoLocation | undefined {
 
 export function createPupo(pupo: Omit<PupoLocation, "id">): PupoLocation {
   const pupi = getAllPupi()
+  // Generate a more robust ID using timestamp + random string
+  const randomSuffix = Math.random().toString(36).substring(2, 9)
   const newPupo = {
     ...pupo,
-    id: Date.now().toString(),
+    id: `${Date.now()}-${randomSuffix}`,
   }
   pupi.push(newPupo)
   fs.writeFileSync(PUPI_FILE, JSON.stringify(pupi, null, 2))

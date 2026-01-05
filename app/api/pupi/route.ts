@@ -17,6 +17,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     // Check for admin authentication
+    // Note: In production, use HTTPS and consider implementing proper session tokens
+    // This simple approach is suitable for single-admin scenarios
     const adminPassword = request.headers.get("x-admin-password")
     if (adminPassword !== process.env.ADMIN_PASSWORD) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

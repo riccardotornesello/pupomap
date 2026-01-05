@@ -48,14 +48,12 @@ interface PupoMapProps {
   locations: PupoLocation[]
   onSelectLocation: (location: PupoLocation) => void
   selectedLocationId?: string
-  userLocation?: [number, number] | null
 }
 
 export const PupoMap: React.FC<PupoMapProps> = ({
   locations,
   onSelectLocation,
   selectedLocationId,
-  userLocation,
 }) => {
   const [center, setCenter] = useState<[number, number]>(INITIAL_CENTER)
 
@@ -84,13 +82,6 @@ export const PupoMap: React.FC<PupoMapProps> = ({
       />
 
       <MapController center={center} />
-
-      {/* User Location Marker */}
-      {userLocation && (
-        <Marker position={userLocation} icon={userIcon}>
-          <Popup>Sei qui!</Popup>
-        </Marker>
-      )}
 
       {locations.map((pupo) => (
         <Marker

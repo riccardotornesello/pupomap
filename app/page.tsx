@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Map, List, Navigation, LogIn, User as UserIcon } from "lucide-react"
 import { PupoCard } from "../components/PupoCard"
 import { PUPI_DATA, INITIAL_VOTES } from "../constants"
@@ -15,27 +15,11 @@ const PupoMap = dynamic(() => import("../components/PupoMap"), {
 export default function Home() {
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.MAP)
   const [selectedPupo, setSelectedPupo] = useState<PupoLocation | null>(null)
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(
-    null
-  )
 
   // Auth & Voting State
   const [user, setUser] = useState<User | null>(null)
   const [votes, setVotes] = useState<Record<string, number>>(INITIAL_VOTES)
   const [userVotes, setUserVotes] = useState<Set<string>>(new Set())
-
-  useEffect(() => {
-    // Attempt to get user location on load for map centering/marker
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation([position.coords.latitude, position.coords.longitude])
-        },
-        (error) => console.log("Geolocation not enabled or error:", error),
-        { enableHighAccuracy: true }
-      )
-    }
-  }, [])
 
   const handleLogin = () => {
     // Simulated Google Login
@@ -156,7 +140,6 @@ export default function Home() {
             locations={PUPI_DATA}
             onSelectLocation={handleSelectPupo}
             selectedLocationId={selectedPupo?.id}
-            userLocation={userLocation}
           />
         </div>
 

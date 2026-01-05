@@ -1,11 +1,11 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Map, List, Navigation, LogIn, User as UserIcon } from "lucide-react"
 import { signIn, useSession } from "next-auth/react"
 import { PupoCard } from "../components/PupoCard"
-import { PUPI_DATA, INITIAL_VOTES } from "../constants"
+import { INITIAL_VOTES } from "../constants"
 import { PupoLocation, ViewMode, User } from "../types"
 
 const PupoMap = dynamic(() => import("../components/PupoMap"), {
@@ -17,6 +17,8 @@ export default function Home() {
   const { data: session } = useSession()
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.MAP)
   const [selectedPupo, setSelectedPupo] = useState<PupoLocation | null>(null)
+  const [pupiData, setPupiData] = useState<PupoLocation[]>([])
+  const [loading, setLoading] = useState(true)
 
   // Auth & Voting State
   const user: User | null = session?.user
@@ -31,6 +33,22 @@ export default function Home() {
 
   const [votes, setVotes] = useState<Record<string, number>>(INITIAL_VOTES)
   const [userVotes, setUserVotes] = useState<Set<string>>(new Set())
+
+  // Fetch pupi data from API
+  useEffect(() => {
+    const fetchPupi = async () => {
+      try {
+        const response = await fetch("/api/pupi")
+        const data = await response.json()
+        setPupiData(data)
+      } catch (error) {
+        console.error("Error fetching pupi:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchPupi()
+  }, [])
 
   const handleLogin = () => {
     signIn("google")
@@ -73,11 +91,19 @@ export default function Home() {
   }
 
   // Sort Pupi for list view based on votes
-  const sortedPupi = [...PUPI_DATA].sort((a, b) => {
+  const sortedPupi = [...pupiData].sort((a, b) => {
     const votesA = votes[a.id] || 0
     const votesB = votes[b.id] || 0
     return votesB - votesA
   })
+
+  if (loading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-stone-50">
+        <p className="text-stone-500">Caricamento...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="h-screen w-screen flex flex-col bg-stone-50 overflow-hidden relative font-sans">
@@ -141,7 +167,7 @@ export default function Home() {
           className={`absolute inset-0 w-full h-full ${viewMode === ViewMode.MAP ? "block z-10" : "hidden z-0"}`}
         >
           <PupoMap
-            locations={PUPI_DATA}
+            locations={pupiData}
             onSelectLocation={handleSelectPupo}
             selectedLocationId={selectedPupo?.id}
           />

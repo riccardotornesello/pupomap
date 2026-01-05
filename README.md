@@ -27,6 +27,7 @@ Before running the application, you need to set up Google OAuth credentials:
    - `GOOGLE_CLIENT_SECRET`: Your Google OAuth Client Secret
    - `NEXTAUTH_SECRET`: Generate a random secret using: `openssl rand -base64 32`
    - `NEXTAUTH_URL`: Keep as `http://localhost:3000` for local development
+   - `ADMIN_PASSWORD`: Set a secure password for admin backoffice access
 
 ### Installation
 
@@ -62,6 +63,19 @@ The application now uses real Google OAuth authentication:
 - The system retrieves your first name, last name, and unique identifier
 - Your authentication session persists across page refreshes
 - Users must be authenticated to vote on Pupi
+
+### Admin Backoffice
+
+The application includes an admin backoffice system for managing pupi:
+
+- Access the admin login at [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
+- Use the password configured in the `ADMIN_PASSWORD` environment variable
+- From the admin dashboard you can:
+  - Create new pupi
+  - Edit existing pupi
+  - Delete pupi
+  - View all pupi in a table format
+- All changes are persisted to a JSON file in the `data/` directory
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

@@ -75,7 +75,26 @@ The application includes an admin backoffice system for managing pupi:
   - Edit existing pupi
   - Delete pupi
   - View all pupi in a table format
+  - **Choose pupo location by clicking on an interactive map**
+  - **Upload images directly to Google Cloud Storage** (optional)
 - All changes are persisted to a JSON file in the `data/` directory
+
+#### Image Upload Setup (Optional)
+
+To enable image uploads to Google Cloud Storage:
+
+1. Create a Google Cloud Storage bucket
+2. Create a service account with Storage Object Admin permissions
+3. Download the service account key JSON file
+4. Configure the following environment variables in `.env.local`:
+   ```
+   GCS_PROJECT_ID=your-project-id
+   GCS_BUCKET_NAME=your-bucket-name
+   GCS_CREDENTIALS='{"type":"service_account",...}'
+   ```
+5. Make your bucket public or configure appropriate access controls
+
+If GCS is not configured, you can still provide image URLs manually.
 
 **Security Note:** The current implementation uses a simple password-based authentication suitable for single-admin use cases. For production deployments:
 - Always use HTTPS to encrypt credentials in transit

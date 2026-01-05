@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import dynamic from "next/dynamic"
 import { PupoLocation } from "@/types"
-import { Plus, Pencil, Trash2, LogOut, MapPin } from "lucide-react"
+import { Plus, Pencil, Trash2, LogOut, MapPin, Upload } from "lucide-react"
+
+const MapPicker = dynamic(() => import("@/components/admin/MapPicker"), {
+  loading: () => <p>Caricamento mappa...</p>,
+  ssr: false,
+})
 
 export default function AdminDashboard() {
   const [pupi, setPupi] = useState<PupoLocation[]>([])
@@ -11,6 +17,8 @@ export default function AdminDashboard() {
   const [adminPassword, setAdminPassword] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [editingPupo, setEditingPupo] = useState<PupoLocation | null>(null)
+  const [showMapPicker, setShowMapPicker] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -148,6 +156,49 @@ export default function AdminDashboard() {
     })
     setEditingPupo(null)
     setShowForm(false)
+    setShowMapPicker(false)
+  }
+
+  const handleMapLocationSelect = (lat: number, lng: number) => {
+    setFormData({
+      ...formData,
+      lat: lat.toString(),
+      lng: lng.toString(),
+    })
+  }
+
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0]
+    if (!file || !adminPassword) return
+
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          "x-admin-password": adminPassword,
+        },
+        body: formData,
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setFormData((prev) => ({ ...prev, imageUrl: data.url }))
+      } else {
+        const error = await response.json()
+        alert(error.error || "Errore durante il caricamento dell'immagine")
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error)
+      alert("Errore durante il caricamento dell'immagine")
+    } finally {
+      setUploading(false)
+    }
   }
 
   if (loading) {
@@ -254,37 +305,75 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">
-                    Latitudine *
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-stone-700">
+                    Posizione *
                   </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={formData.lat}
-                    onChange={(e) =>
-                      setFormData({ ...formData, lat: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
-                    required
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowMapPicker(!showMapPicker)}
+                    className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700"
+                  >
+                    <MapPin size={16} />
+                    {showMapPicker
+                      ? "Nascondi mappa"
+                      : "Scegli sulla mappa"}
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">
-                    Longitudine *
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={formData.lng}
-                    onChange={(e) =>
-                      setFormData({ ...formData, lng: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
-                    required
-                  />
+
+                {showMapPicker && (
+                  <div className="mb-4">
+                    <MapPicker
+                      initialLat={
+                        formData.lat ? parseFloat(formData.lat) : undefined
+                      }
+                      initialLng={
+                        formData.lng ? parseFloat(formData.lng) : undefined
+                      }
+                      onLocationSelect={handleMapLocationSelect}
+                    />
+                    <p className="text-xs text-stone-500 mt-2">
+                      Clicca sulla mappa per selezionare la posizione del pupo
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                      Latitudine *
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={formData.lat}
+                      onChange={(e) =>
+                        setFormData({ ...formData, lat: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                      Longitudine *
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={formData.lng}
+                      onChange={(e) =>
+                        setFormData({ ...formData, lng: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                      required
+                    />
+                  </div>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-2">
                     Tema *
@@ -303,17 +392,64 @@ export default function AdminDashboard() {
 
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-2">
-                  URL Immagine *
+                  Immagine *
                 </label>
-                <input
-                  type="url"
-                  value={formData.imageUrl}
-                  onChange={(e) =>
-                    setFormData({ ...formData, imageUrl: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
-                  required
-                />
+                <div className="space-y-3">
+                  {/* Upload button */}
+                  <div className="flex items-center gap-3">
+                    <label
+                      htmlFor="image-upload"
+                      className={`flex items-center gap-2 px-4 py-2 border-2 border-dashed border-stone-300 rounded-lg hover:border-red-500 transition-colors cursor-pointer ${
+                        uploading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                    >
+                      <Upload size={20} className="text-stone-500" />
+                      <span className="text-sm text-stone-600">
+                        {uploading
+                          ? "Caricamento..."
+                          : "Carica immagine su Google Cloud"}
+                      </span>
+                    </label>
+                    <input
+                      id="image-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                  </div>
+
+                  {/* OR separator */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-px bg-stone-300"></div>
+                    <span className="text-xs text-stone-500">oppure</span>
+                    <div className="flex-1 h-px bg-stone-300"></div>
+                  </div>
+
+                  {/* URL input */}
+                  <input
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) =>
+                      setFormData({ ...formData, imageUrl: e.target.value })
+                    }
+                    placeholder="Inserisci URL immagine"
+                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                    required
+                  />
+
+                  {/* Preview */}
+                  {formData.imageUrl && (
+                    <div className="mt-3">
+                      <img
+                        src={formData.imageUrl}
+                        alt="Anteprima"
+                        className="w-32 h-32 object-cover rounded-lg border border-stone-300"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-3">

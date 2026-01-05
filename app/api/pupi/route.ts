@@ -34,11 +34,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const parsedLat = parseFloat(lat)
+    const parsedLng = parseFloat(lng)
+
+    // Validate coordinates are valid numbers and within reasonable ranges
+    if (
+      isNaN(parsedLat) ||
+      isNaN(parsedLng) ||
+      parsedLat < -90 ||
+      parsedLat > 90 ||
+      parsedLng < -180 ||
+      parsedLng > 180
+    ) {
+      return NextResponse.json(
+        { error: "Invalid coordinates" },
+        { status: 400 }
+      )
+    }
+
     const newPupo = createPupo({
       name,
       description,
-      lat: parseFloat(lat),
-      lng: parseFloat(lng),
+      lat: parsedLat,
+      lng: parsedLng,
       imageUrl,
       artist,
       theme,

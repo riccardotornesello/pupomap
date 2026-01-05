@@ -1,20 +1,44 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Environment Variables
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20 or higher
+- A Google Cloud account with OAuth credentials
+
+### Setup Google OAuth
 
 Before running the application, you need to set up Google OAuth credentials:
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
 2. Create a new project or select an existing one
-3. Create OAuth 2.0 credentials (Client ID)
-4. Add authorized redirect URI: `http://localhost:3000/api/auth/callback/google` (for local development)
-5. Copy `.env.local.example` to `.env.local` and fill in:
+3. Enable the Google+ API for your project
+4. Create OAuth 2.0 credentials (OAuth client ID)
+   - Application type: Web application
+   - Authorized JavaScript origins: `http://localhost:3000`
+   - Authorized redirect URIs: `http://localhost:3000/api/auth/callback/google`
+5. Copy `.env.local.example` to `.env.local`:
+   ```bash
+   cp .env.local.example .env.local
+   ```
+6. Fill in your credentials in `.env.local`:
    - `GOOGLE_CLIENT_ID`: Your Google OAuth Client ID
    - `GOOGLE_CLIENT_SECRET`: Your Google OAuth Client Secret
-   - `NEXTAUTH_SECRET`: Generate a random secret (you can use: `openssl rand -base64 32`)
+   - `NEXTAUTH_SECRET`: Generate a random secret using: `openssl rand -base64 32`
    - `NEXTAUTH_URL`: Keep as `http://localhost:3000` for local development
 
-## Getting Started
+### Installation
+
+Install dependencies:
+
+```bash
+pnpm install
+# or
+npm install
+```
+
+### Running the Development Server
 
 First, run the development server:
 
@@ -29,6 +53,15 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+### Authentication Features
+
+The application now uses real Google OAuth authentication:
+
+- Click "Accedi con Google" to sign in with your Google account
+- The system retrieves your first name, last name, and unique identifier
+- Your authentication session persists across page refreshes
+- Users must be authenticated to vote on Pupi
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

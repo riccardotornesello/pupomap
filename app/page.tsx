@@ -89,9 +89,9 @@ export default function Home() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-stone-900 leading-tight">
-              Pupi di Gallipoli
+              Pupo Map
             </h1>
-            <p className="text-xs text-stone-500">Mappa Ufficiale Capodanno</p>
+            <p className="text-xs text-stone-500">Mappa dei Pupi di Capodanno</p>
           </div>
         </div>
 

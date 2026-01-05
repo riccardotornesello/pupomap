@@ -87,22 +87,7 @@ export const PupoMap: React.FC<PupoMapProps> = ({
           eventHandlers={{
             click: () => onSelectLocation(pupo),
           }}
-        >
-          <Popup className="rounded-lg overflow-hidden">
-            <div className="text-center min-w-[150px]">
-              <h3 className="font-bold text-stone-800 text-sm mb-1">
-                {pupo.name}
-              </h3>
-              <p className="text-xs text-stone-500 mb-2">{pupo.theme}</p>
-              <button
-                onClick={() => onSelectLocation(pupo)}
-                className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-red-100 transition-colors"
-              >
-                Apri Scheda
-              </button>
-            </div>
-          </Popup>
-        </Marker>
+        />
       ))}
     </MapContainer>
   )

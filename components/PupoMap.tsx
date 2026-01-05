@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
 import L from "leaflet"
 import { PupoLocation } from "../types"
@@ -30,7 +30,6 @@ const createCustomIcon = (color: string = "#DC2626") => {
 }
 
 const customIcon = createCustomIcon("#DC2626")
-const userIcon = createCustomIcon("#2563EB")
 
 interface MapControllerProps {
   center: [number, number]
@@ -55,16 +54,13 @@ export const PupoMap: React.FC<PupoMapProps> = ({
   onSelectLocation,
   selectedLocationId,
 }) => {
-  const [center, setCenter] = useState<[number, number]>(INITIAL_CENTER)
-
-  useEffect(() => {
-    if (selectedLocationId) {
-      const loc = locations.find((l) => l.id === selectedLocationId)
-      if (loc) {
-        setCenter([loc.lat, loc.lng])
-      }
-    }
-  }, [selectedLocationId, locations])
+  // Calculate center based on selectedLocationId
+  const selectedLocation = selectedLocationId
+    ? locations.find((l) => l.id === selectedLocationId)
+    : null
+  const center: [number, number] = selectedLocation
+    ? [selectedLocation.lat, selectedLocation.lng]
+    : INITIAL_CENTER
 
   return (
     <MapContainer

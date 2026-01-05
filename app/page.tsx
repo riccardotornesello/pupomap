@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic"
 import { useState } from "react"
 import { Map, List, Navigation, LogIn, User as UserIcon } from "lucide-react"
+import { signIn, useSession } from "next-auth/react"
 import { PupoCard } from "../components/PupoCard"
 import { PUPI_DATA, INITIAL_VOTES } from "../constants"
 import { PupoLocation, ViewMode, User } from "../types"
@@ -13,23 +14,26 @@ const PupoMap = dynamic(() => import("../components/PupoMap"), {
 })
 
 export default function Home() {
+  const { data: session } = useSession()
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.MAP)
   const [selectedPupo, setSelectedPupo] = useState<PupoLocation | null>(null)
 
   // Auth & Voting State
-  const [user, setUser] = useState<User | null>(null)
+  const user: User | null = session?.user
+    ? {
+        id: session.user.id,
+        firstName: session.user.firstName,
+        lastName: session.user.lastName,
+        name: session.user.name,
+        avatar: session.user.image,
+      }
+    : null
+
   const [votes, setVotes] = useState<Record<string, number>>(INITIAL_VOTES)
   const [userVotes, setUserVotes] = useState<Set<string>>(new Set())
 
   const handleLogin = () => {
-    // Simulated Google Login
-    const mockUser: User = {
-      id: "g_12345",
-      name: "Utente Google",
-      avatar: "https://lh3.googleusercontent.com/a/default-user=s96-c",
-    }
-    setUser(mockUser)
-    alert("Accesso effettuato con successo!")
+    signIn("google")
   }
 
   const handleVote = (pupoId: string) => {

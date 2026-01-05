@@ -11,7 +11,9 @@ export interface PupoLocation {
 
 export interface User {
   id: string
-  name: string
+  firstName: string
+  lastName: string
+  name: string // Full name for display
   avatar?: string
 }
 

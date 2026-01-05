@@ -41,11 +41,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize Google Cloud Storage
+    let credentials
+    try {
+      credentials = process.env.GCS_CREDENTIALS
+        ? JSON.parse(process.env.GCS_CREDENTIALS)
+        : undefined
+    } catch (error) {
+      console.error("Error parsing GCS_CREDENTIALS:", error)
+      return NextResponse.json(
+        { error: "Invalid GCS configuration" },
+        { status: 500 }
+      )
+    }
+
     const storage = new Storage({
       projectId: process.env.GCS_PROJECT_ID,
-      credentials: process.env.GCS_CREDENTIALS
-        ? JSON.parse(process.env.GCS_CREDENTIALS)
-        : undefined,
+      credentials,
     })
 
     const bucket = storage.bucket(process.env.GCS_BUCKET_NAME)
@@ -53,7 +64,8 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const timestamp = Date.now()
     const randomSuffix = Math.random().toString(36).substring(2, 9)
-    const extension = file.name.split(".").pop()
+    const filenameParts = file.name.split(".")
+    const extension = filenameParts.length > 1 ? filenameParts.pop() : "jpg"
     const filename = `pupi/${timestamp}-${randomSuffix}.${extension}`
 
     // Convert File to Buffer

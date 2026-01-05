@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
 import L from "leaflet"
 import { PupoLocation } from "../types"

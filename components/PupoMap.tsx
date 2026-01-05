@@ -6,10 +6,6 @@ import { INITIAL_CENTER, GALLIPOLI_BOUNDS } from "../constants"
 import { MapPin } from "lucide-react"
 import { renderToString } from "react-dom/server"
 
-// --- Fix for Markers Click Area ---
-// Rimosso le trasformazioni CSS che spostavano l'icona fuori dall'area cliccabile.
-// L'icona ora riempie il contenitore 40x40 definito da Leaflet, e l'anchor point [20, 40]
-// assicura che la punta del pin sia sulle coordinate corrette.
 const createCustomIcon = (color: string = "#DC2626") => {
   const iconHtml = renderToString(
     <div className="w-full h-full flex items-center justify-center">
@@ -35,25 +31,6 @@ const createCustomIcon = (color: string = "#DC2626") => {
 
 const customIcon = createCustomIcon("#DC2626")
 const userIcon = createCustomIcon("#2563EB")
-
-// --- Fix for Gray Map Area ---
-// Questo componente forza Leaflet a ricalcolare le dimensioni del contenitore
-// una volta che il componente è montato e il layout è stabile.
-const MapRealigner = () => {
-  const map = useMap()
-
-  useEffect(() => {
-    // Invalidate size immediatamente e dopo un breve ritardo per sicurezza
-    map.invalidateSize()
-    const timer = setTimeout(() => {
-      map.invalidateSize()
-    }, 200)
-
-    return () => clearTimeout(timer)
-  }, [map])
-
-  return null
-}
 
 interface MapControllerProps {
   center: [number, number]
@@ -101,8 +78,6 @@ export const PupoMap: React.FC<PupoMapProps> = ({
       scrollWheelZoom={true}
       className="w-full h-full z-0"
     >
-      <MapRealigner />
-
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

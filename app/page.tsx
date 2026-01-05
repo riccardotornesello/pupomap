@@ -150,7 +150,7 @@ export default function Home() {
       <main className="flex-1 relative overflow-hidden">
         {/* Map View */}
         <div
-          className={`absolute inset-0 transition-opacity duration-300 ${viewMode === ViewMode.MAP ? "opacity-100 z-10" : "opacity-0 z-0"}`}
+          className={`absolute inset-0 w-full h-full ${viewMode === ViewMode.MAP ? "block z-10" : "hidden z-0"}`}
         >
           <PupoMap
             locations={PUPI_DATA}

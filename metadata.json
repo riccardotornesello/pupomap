@@ -1,7 +1,0 @@
-{
-  "name": "Pupi di Gallipoli Explorer",
-  "description": "Mappa interattiva e guida virtuale per la tradizione dei Pupi di Capodanno a Gallipoli.",
-  "requestFramePermissions": [
-    "geolocation"
-  ]
-}

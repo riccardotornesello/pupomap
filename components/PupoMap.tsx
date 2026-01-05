@@ -1,85 +1,95 @@
-import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import { PupoLocation } from '../types';
-import { INITIAL_CENTER, GALLIPOLI_BOUNDS } from '../constants';
-import { MapPin } from 'lucide-react';
-import { renderToString } from 'react-dom/server';
+import React, { useEffect, useState } from "react"
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
+import L from "leaflet"
+import { PupoLocation } from "../types"
+import { INITIAL_CENTER, GALLIPOLI_BOUNDS } from "../constants"
+import { MapPin } from "lucide-react"
+import { renderToString } from "react-dom/server"
 
 // --- Fix for Markers Click Area ---
 // Rimosso le trasformazioni CSS che spostavano l'icona fuori dall'area cliccabile.
 // L'icona ora riempie il contenitore 40x40 definito da Leaflet, e l'anchor point [20, 40]
 // assicura che la punta del pin sia sulle coordinate corrette.
-const createCustomIcon = (color: string = '#DC2626') => {
+const createCustomIcon = (color: string = "#DC2626") => {
   const iconHtml = renderToString(
     <div className="w-full h-full flex items-center justify-center">
       <div style={{ color: color }} className="drop-shadow-md filter">
-         <MapPin fill="currentColor" stroke="white" strokeWidth={1.5} size={40} />
+        <MapPin
+          fill="currentColor"
+          stroke="white"
+          strokeWidth={1.5}
+          size={40}
+        />
       </div>
     </div>
-  );
+  )
 
   return L.divIcon({
     html: iconHtml,
-    className: 'custom-marker-icon', 
+    className: "custom-marker-icon",
     iconSize: [40, 40],
     iconAnchor: [20, 40], // X=Center, Y=Bottom
-    popupAnchor: [0, -40]
-  });
-};
+    popupAnchor: [0, -40],
+  })
+}
 
-const customIcon = createCustomIcon('#DC2626');
-const userIcon = createCustomIcon('#2563EB');
+const customIcon = createCustomIcon("#DC2626")
+const userIcon = createCustomIcon("#2563EB")
 
 // --- Fix for Gray Map Area ---
 // Questo componente forza Leaflet a ricalcolare le dimensioni del contenitore
 // una volta che il componente è montato e il layout è stabile.
 const MapRealigner = () => {
-  const map = useMap();
+  const map = useMap()
 
   useEffect(() => {
     // Invalidate size immediatamente e dopo un breve ritardo per sicurezza
-    map.invalidateSize();
+    map.invalidateSize()
     const timer = setTimeout(() => {
-        map.invalidateSize();
-    }, 200);
+      map.invalidateSize()
+    }, 200)
 
-    return () => clearTimeout(timer);
-  }, [map]);
+    return () => clearTimeout(timer)
+  }, [map])
 
-  return null;
-};
+  return null
+}
 
 interface MapControllerProps {
-    center: [number, number];
+  center: [number, number]
 }
 
 const MapController: React.FC<MapControllerProps> = ({ center }) => {
-    const map = useMap();
-    useEffect(() => {
-        map.flyTo(center, 15, { duration: 1.5 });
-    }, [center, map]);
-    return null;
+  const map = useMap()
+  useEffect(() => {
+    map.flyTo(center, 15, { duration: 1.5 })
+  }, [center, map])
+  return null
 }
 
 interface PupoMapProps {
-  locations: PupoLocation[];
-  onSelectLocation: (location: PupoLocation) => void;
-  selectedLocationId?: string;
-  userLocation?: [number, number] | null;
+  locations: PupoLocation[]
+  onSelectLocation: (location: PupoLocation) => void
+  selectedLocationId?: string
+  userLocation?: [number, number] | null
 }
 
-export const PupoMap: React.FC<PupoMapProps> = ({ locations, onSelectLocation, selectedLocationId, userLocation }) => {
-    const [center, setCenter] = useState<[number, number]>(INITIAL_CENTER);
+export const PupoMap: React.FC<PupoMapProps> = ({
+  locations,
+  onSelectLocation,
+  selectedLocationId,
+  userLocation,
+}) => {
+  const [center, setCenter] = useState<[number, number]>(INITIAL_CENTER)
 
-    useEffect(() => {
-        if (selectedLocationId) {
-            const loc = locations.find(l => l.id === selectedLocationId);
-            if (loc) {
-                setCenter([loc.lat, loc.lng]);
-            }
-        }
-    }, [selectedLocationId, locations]);
+  useEffect(() => {
+    if (selectedLocationId) {
+      const loc = locations.find((l) => l.id === selectedLocationId)
+      if (loc) {
+        setCenter([loc.lat, loc.lng])
+      }
+    }
+  }, [selectedLocationId, locations])
 
   return (
     <MapContainer
@@ -92,19 +102,19 @@ export const PupoMap: React.FC<PupoMapProps> = ({ locations, onSelectLocation, s
       className="w-full h-full z-0"
     >
       <MapRealigner />
-      
+
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      
+
       <MapController center={center} />
 
       {/* User Location Marker */}
       {userLocation && (
-          <Marker position={userLocation} icon={userIcon}>
-             <Popup>Sei qui!</Popup>
-          </Marker>
+        <Marker position={userLocation} icon={userIcon}>
+          <Popup>Sei qui!</Popup>
+        </Marker>
       )}
 
       {locations.map((pupo) => (
@@ -117,19 +127,23 @@ export const PupoMap: React.FC<PupoMapProps> = ({ locations, onSelectLocation, s
           }}
         >
           <Popup className="rounded-lg overflow-hidden">
-             <div className="text-center min-w-[150px]">
-                 <h3 className="font-bold text-stone-800 text-sm mb-1">{pupo.name}</h3>
-                 <p className="text-xs text-stone-500 mb-2">{pupo.theme}</p>
-                 <button 
-                    onClick={() => onSelectLocation(pupo)} 
-                    className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-red-100 transition-colors"
-                 >
-                    Apri Scheda
-                 </button>
-             </div>
+            <div className="text-center min-w-[150px]">
+              <h3 className="font-bold text-stone-800 text-sm mb-1">
+                {pupo.name}
+              </h3>
+              <p className="text-xs text-stone-500 mb-2">{pupo.theme}</p>
+              <button
+                onClick={() => onSelectLocation(pupo)}
+                className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-red-100 transition-colors"
+              >
+                Apri Scheda
+              </button>
+            </div>
           </Popup>
         </Marker>
       ))}
     </MapContainer>
-  );
-};
+  )
+}
+
+export default PupoMap

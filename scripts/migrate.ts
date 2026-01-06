@@ -8,6 +8,17 @@ import { migrate as migratePostgres } from "drizzle-orm/postgres-js/migrator"
 import path from "path"
 import fs from "fs"
 
+async function runSqliteMigration(dbPath: string) {
+  console.log("Using SQLite database")
+  const sqlite = new Database(dbPath)
+  sqlite.pragma("journal_mode = WAL")
+  const db = drizzleSqlite(sqlite)
+
+  await migrateSqlite(db, { migrationsFolder: "./drizzle" })
+  console.log("SQLite migrations completed successfully!")
+  sqlite.close()
+}
+
 async function runMigrations() {
   const databaseUrl = process.env.DATABASE_URL
 
@@ -21,13 +32,7 @@ async function runMigrations() {
       fs.mkdirSync(dataDir, { recursive: true })
     }
     const dbPath = path.join(dataDir, "pupi.db")
-    const sqlite = new Database(dbPath)
-    sqlite.pragma("journal_mode = WAL")
-    const db = drizzleSqlite(sqlite)
-
-    await migrateSqlite(db, { migrationsFolder: "./drizzle" })
-    console.log("SQLite migrations completed successfully!")
-    sqlite.close()
+    await runSqliteMigration(dbPath)
     return
   }
 
@@ -52,27 +57,13 @@ async function runMigrations() {
   }
 
   if (databaseUrl.startsWith("sqlite://") || databaseUrl.startsWith("file:")) {
-    console.log("Using SQLite database")
     const dbPath = databaseUrl.replace(/^(sqlite:\/\/|file:)/, "")
-    const sqlite = new Database(dbPath)
-    sqlite.pragma("journal_mode = WAL")
-    const db = drizzleSqlite(sqlite)
-
-    await migrateSqlite(db, { migrationsFolder: "./drizzle" })
-    console.log("SQLite migrations completed successfully!")
-    sqlite.close()
+    await runSqliteMigration(dbPath)
     return
   }
 
   // Default: treat as SQLite path
-  console.log("Using SQLite database")
-  const sqlite = new Database(databaseUrl)
-  sqlite.pragma("journal_mode = WAL")
-  const db = drizzleSqlite(sqlite)
-
-  await migrateSqlite(db, { migrationsFolder: "./drizzle" })
-  console.log("SQLite migrations completed successfully!")
-  sqlite.close()
+  await runSqliteMigration(databaseUrl)
 }
 
 runMigrations()

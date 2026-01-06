@@ -8,6 +8,7 @@ import { PupoLocation } from "@/types"
 import path from "path"
 import fs from "fs"
 
+// Database type definitions
 type SqliteDB = ReturnType<typeof drizzleSqlite<{ pupi: typeof pupi }>>
 type PostgresDB = ReturnType<typeof drizzlePostgres<{ pupi: typeof pupi }>>
 
@@ -17,6 +18,12 @@ interface DatabaseConnection {
 }
 
 let dbConnection: DatabaseConnection | null = null
+
+// Note: We use `any` type casting in database operations because TypeScript cannot
+// properly resolve the union type between SqliteDB and PostgresDB method signatures.
+// This is a known limitation when supporting multiple database drivers with Drizzle ORM.
+// The runtime behavior is correct, and the type safety is maintained at the function
+// parameter and return value level.
 
 function initializeDatabaseConnection(): DatabaseConnection {
   const databaseUrl = process.env.DATABASE_URL

@@ -6,7 +6,7 @@ import fs from "fs"
 
 // Database interface for abstraction
 interface DatabaseAdapter {
-  initialize(): void
+  initialize(): void | Promise<void>
   getAllPupi(): PupoLocation[]
   getPupoById(id: string): PupoLocation | undefined
   createPupo(pupo: PupoLocation): PupoLocation
@@ -423,7 +423,7 @@ class PostgreSQLAdapter implements DatabaseAdapter {
 }
 
 // Factory to create the appropriate adapter
-function createDatabaseAdapter(): DatabaseAdapter | PostgreSQLAdapter {
+function createDatabaseAdapter(): DatabaseAdapter {
   const databaseUrl = process.env.DATABASE_URL
 
   if (!databaseUrl) {
@@ -441,8 +441,7 @@ function createDatabaseAdapter(): DatabaseAdapter | PostgreSQLAdapter {
 
   if (databaseUrl.startsWith("postgres://") || databaseUrl.startsWith("postgresql://")) {
     console.log("Using PostgreSQL database")
-    const adapter = new PostgreSQLAdapter(databaseUrl)
-    return adapter
+    return new PostgreSQLAdapter(databaseUrl)
   }
 
   if (databaseUrl.startsWith("sqlite://") || databaseUrl.startsWith("file:")) {
@@ -461,9 +460,9 @@ function createDatabaseAdapter(): DatabaseAdapter | PostgreSQLAdapter {
 }
 
 // Singleton instance
-let dbInstance: DatabaseAdapter | PostgreSQLAdapter | null = null
+let dbInstance: DatabaseAdapter | null = null
 
-export function getDatabase(): DatabaseAdapter | PostgreSQLAdapter {
+export function getDatabase(): DatabaseAdapter {
   if (!dbInstance) {
     dbInstance = createDatabaseAdapter()
   }
@@ -471,7 +470,7 @@ export function getDatabase(): DatabaseAdapter | PostgreSQLAdapter {
 }
 
 export function isPostgreSQL(
-  db: DatabaseAdapter | PostgreSQLAdapter
+  db: DatabaseAdapter
 ): db is PostgreSQLAdapter {
   return db instanceof PostgreSQLAdapter
 }

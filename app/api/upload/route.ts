@@ -30,17 +30,27 @@ export async function POST(request: NextRequest) {
         for (const pupo of body) {
           if (
             !pupo.name ||
+            typeof pupo.name !== "string" ||
+            pupo.name.trim() === "" ||
             !pupo.description ||
+            typeof pupo.description !== "string" ||
+            pupo.description.trim() === "" ||
             typeof pupo.lat !== "number" ||
             typeof pupo.lng !== "number" ||
             !pupo.imageUrl ||
+            typeof pupo.imageUrl !== "string" ||
+            pupo.imageUrl.trim() === "" ||
             !pupo.artist ||
-            !pupo.theme
+            typeof pupo.artist !== "string" ||
+            pupo.artist.trim() === "" ||
+            !pupo.theme ||
+            typeof pupo.theme !== "string" ||
+            pupo.theme.trim() === ""
           ) {
             return NextResponse.json(
               {
                 error:
-                  "Each pupo must have: name, description, lat (number), lng (number), imageUrl, artist, theme",
+                  "Each pupo must have: name, description, lat (number), lng (number), imageUrl, artist, theme. All string fields must be non-empty.",
               },
               { status: 400 }
             )

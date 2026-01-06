@@ -77,7 +77,8 @@ export async function bulkImportPupi(
       success++
     } catch (error) {
       failed++
-      errors.push(`Failed to import ${pupo.name}: ${error}`)
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      errors.push(`Failed to import ${pupo.name}: ${errorMessage}`)
     }
   }
 

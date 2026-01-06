@@ -10,10 +10,10 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ### Database Setup
 
-The application supports both PostgreSQL and SQLite databases:
+The application uses **Drizzle ORM** with a migration system that supports both PostgreSQL and SQLite databases.
 
 #### Using SQLite (Default)
-If no `DATABASE_URL` is configured, the application will automatically use SQLite with the database file stored at `data/pupi.db`. No additional setup required!
+If no `DATABASE_URL` is configured, the application will automatically use SQLite with the database file stored at `data/pupi.db`.
 
 #### Using PostgreSQL
 1. Set up a PostgreSQL database
@@ -22,7 +22,57 @@ If no `DATABASE_URL` is configured, the application will automatically use SQLit
    DATABASE_URL=postgresql://user:password@localhost:5432/pupomap
    ```
 
-The database schema will be automatically created on first run, and default data will be seeded if the database is empty.
+#### Database Migrations
+
+The database schema is managed through migrations using Drizzle Kit:
+
+- **Development**: Migrations run automatically when you start the dev server
+- **Production**: Migrations run automatically after build via the `postbuild` script
+
+**Migration Commands:**
+```bash
+# Generate a new migration after schema changes
+pnpm db:generate
+
+# Run migrations manually
+pnpm db:migrate
+
+# Open Drizzle Studio to view/edit database
+pnpm db:studio
+```
+
+#### Seeding Data
+
+The database no longer seeds data automatically. Instead, you can load data in two ways:
+
+1. **Via Admin Panel**: 
+   - Go to the admin backoffice at `/admin`
+   - Click the "Importa JSON" button
+   - Upload a JSON file with pupi data (see `seed-data.json` for format example)
+
+2. **Via API**:
+   ```bash
+   curl -X POST http://localhost:3000/api/admin/seed \
+     -H "Content-Type: application/json" \
+     -H "x-admin-password: your-admin-password" \
+     -d '{"pupi": [...]}'
+   ```
+
+**JSON Format Example:**
+```json
+[
+  {
+    "id": "1",
+    "name": "Pupo Name",
+    "description": "Description",
+    "lat": 40.0565,
+    "lng": 17.978,
+    "imageUrl": "https://example.com/image.jpg",
+    "artist": "Artist Name",
+    "theme": "Theme"
+  }
+]
+```
 
 ### Setup Google OAuth
 

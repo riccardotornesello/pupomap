@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { pupoId } = body
 
-    if (!pupoId || typeof pupoId !== "number") {
+    if (pupoId == null || typeof pupoId !== "number") {
       return NextResponse.json(
         { error: "Invalid pupoId" },
         { status: 400 }

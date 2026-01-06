@@ -66,7 +66,9 @@ export const HomeContent: React.FC<HomeContentProps> = ({ pupiData }) => {
     const wasVoted = userVotes.has(pupoId)
     setVotes((prev) => ({
       ...prev,
-      [pupoId]: wasVoted ? (prev[pupoId] || 1) - 1 : (prev[pupoId] || 0) + 1,
+      [pupoId]: wasVoted
+        ? Math.max(0, (prev[pupoId] || 0) - 1)
+        : (prev[pupoId] || 0) + 1,
     }))
 
     setUserVotes((prev) => {
@@ -100,7 +102,7 @@ export const HomeContent: React.FC<HomeContentProps> = ({ pupiData }) => {
           ...prev,
           [pupoId]: wasVoted
             ? (prev[pupoId] || 0) + 1
-            : (prev[pupoId] || 1) - 1,
+            : Math.max(0, (prev[pupoId] || 0) - 1),
         }))
         setUserVotes((prev) => {
           const newSet = new Set(prev)
@@ -117,7 +119,9 @@ export const HomeContent: React.FC<HomeContentProps> = ({ pupiData }) => {
       // Revert optimistic update on error
       setVotes((prev) => ({
         ...prev,
-        [pupoId]: wasVoted ? (prev[pupoId] || 0) + 1 : (prev[pupoId] || 1) - 1,
+        [pupoId]: wasVoted
+          ? (prev[pupoId] || 0) + 1
+          : Math.max(0, (prev[pupoId] || 0) - 1),
       }))
       setUserVotes((prev) => {
         const newSet = new Set(prev)

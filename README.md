@@ -22,7 +22,9 @@ If no `DATABASE_URL` is configured, the application will automatically use SQLit
    DATABASE_URL=postgresql://user:password@localhost:5432/pupomap
    ```
 
-The database schema will be automatically created on first run, and default data will be seeded if the database is empty.
+**Note:** The database schema will be automatically created on first run. **The database starts empty** - no default data is seeded. You can import data via:
+- Manual entry through the admin panel
+- Bulk import via JSON file upload (see [Data Import Guide](./DATA_IMPORT.md))
 
 ### Setup Google OAuth
 
@@ -81,13 +83,15 @@ The application includes an admin backoffice system for managing pupi:
 - Access the admin login at [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
 - Use the password configured in the `ADMIN_PASSWORD` environment variable
 - From the admin dashboard you can:
-  - Create new pupi
+  - **Import data in bulk via JSON file upload** - see [Data Import Guide](./DATA_IMPORT.md)
+  - Create new pupi manually
   - Edit existing pupi
   - Delete pupi
   - View all pupi in a table format
   - **Choose pupo location by clicking on an interactive map**
   - **Upload images directly to Vercel Blob** (optional)
 - All changes are persisted to the configured database (SQLite or PostgreSQL)
+- **Database uses auto-incrementing integer IDs**
 
 #### Image Upload Setup (Optional)
 

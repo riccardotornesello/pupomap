@@ -46,7 +46,7 @@ const MapController: React.FC<MapControllerProps> = ({ center }) => {
 interface PupoMapProps {
   locations: PupoLocation[]
   onSelectLocation: (location: PupoLocation) => void
-  selectedLocationId?: string
+  selectedLocationId?: number
 }
 
 export const PupoMap: React.FC<PupoMapProps> = ({

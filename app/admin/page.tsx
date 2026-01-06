@@ -76,6 +76,49 @@ export default function AdminDashboard() {
     router.push("/admin/login")
   }
 
+  const handleJsonUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0]
+    if (!file || !adminPassword) return
+
+    if (!file.name.endsWith(".json")) {
+      alert("Il file deve essere in formato JSON")
+      return
+    }
+
+    setUploading(true)
+    try {
+      const text = await file.text()
+      const jsonData = JSON.parse(text)
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": adminPassword,
+        },
+        body: JSON.stringify(jsonData),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        alert(result.message)
+        fetchPupi()
+      } else {
+        const error = await response.json()
+        alert(error.error || "Errore durante l'importazione del file JSON")
+      }
+    } catch (error) {
+      console.error("Error uploading JSON:", error)
+      alert("Errore durante la lettura o l'importazione del file JSON")
+    } finally {
+      setUploading(false)
+      // Reset the file input
+      event.target.value = ""
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!adminPassword) return
@@ -121,7 +164,7 @@ export default function AdminDashboard() {
     setShowForm(true)
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (!adminPassword) return
     if (!confirm("Sei sicuro di voler eliminare questo pupo?")) return
 
@@ -239,17 +282,38 @@ export default function AdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Actions */}
-        <div className="mb-6 flex justify-between items-center">
+        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h2 className="text-2xl font-bold text-stone-900">
             Pupi ({pupi.length})
           </h2>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-          >
-            <Plus size={18} />
-            Aggiungi Pupo
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <label
+              htmlFor="json-upload"
+              className={`flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors cursor-pointer ${
+                uploading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              <Upload size={18} />
+              <span className="text-sm">
+                {uploading ? "Importazione..." : "Importa JSON"}
+              </span>
+            </label>
+            <input
+              id="json-upload"
+              type="file"
+              accept=".json,application/json"
+              onChange={handleJsonUpload}
+              disabled={uploading}
+              className="hidden"
+            />
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <Plus size={18} />
+              Aggiungi Pupo
+            </button>
+          </div>
         </div>
 
         {/* Form */}

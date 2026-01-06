@@ -7,7 +7,13 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const pupo = await getPupoById(id)
+    const numericId = parseInt(id, 10)
+    
+    if (isNaN(numericId)) {
+      return NextResponse.json({ error: "Invalid ID format" }, { status: 400 })
+    }
+    
+    const pupo = await getPupoById(numericId)
 
     if (!pupo) {
       return NextResponse.json({ error: "Pupo not found" }, { status: 404 })
@@ -36,9 +42,15 @@ export async function PUT(
     }
 
     const { id } = await params
+    const numericId = parseInt(id, 10)
+    
+    if (isNaN(numericId)) {
+      return NextResponse.json({ error: "Invalid ID format" }, { status: 400 })
+    }
+    
     const body = await request.json()
 
-    const updatedPupo = await updatePupo(id, body)
+    const updatedPupo = await updatePupo(numericId, body)
 
     if (!updatedPupo) {
       return NextResponse.json({ error: "Pupo not found" }, { status: 404 })
@@ -67,7 +79,13 @@ export async function DELETE(
     }
 
     const { id } = await params
-    const deleted = await deletePupo(id)
+    const numericId = parseInt(id, 10)
+    
+    if (isNaN(numericId)) {
+      return NextResponse.json({ error: "Invalid ID format" }, { status: 400 })
+    }
+    
+    const deleted = await deletePupo(numericId)
 
     if (!deleted) {
       return NextResponse.json({ error: "Pupo not found" }, { status: 404 })

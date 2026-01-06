@@ -14,7 +14,7 @@ const PupoMap = dynamic(() => import("../components/PupoMap"), {
 })
 
 export interface HomeContentProps {
-  pupiData: PupoLocation[]
+  pupiData: PupoLocation[] | null
 }
 
 export const HomeContent: React.FC<HomeContentProps> = ({ pupiData }) => {
@@ -77,7 +77,7 @@ export const HomeContent: React.FC<HomeContentProps> = ({ pupiData }) => {
   }
 
   // Sort Pupi for list view based on votes
-  const sortedPupi = [...pupiData].sort((a, b) => {
+  const sortedPupi = [...(pupiData || [])].sort((a, b) => {
     const votesA = votes[a.id] || 0
     const votesB = votes[b.id] || 0
     return votesB - votesA
@@ -85,6 +85,13 @@ export const HomeContent: React.FC<HomeContentProps> = ({ pupiData }) => {
 
   return (
     <div className="h-screen w-screen flex flex-col bg-stone-50 overflow-hidden relative font-sans">
+      {/* Error Bar */}
+      {pupiData === null && (
+        <div className="w-full bg-red-500 text-white text-center py-2 px-4 font-semibold z-30 shadow-md">
+          Errore nel caricamento dei dati. Riprova più tardi.
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-white border-b border-stone-200 h-16 flex items-center justify-between px-4 sm:px-6 z-20 shrink-0 shadow-sm">
         <div className="flex items-center gap-2">
@@ -147,7 +154,7 @@ export const HomeContent: React.FC<HomeContentProps> = ({ pupiData }) => {
           className={`absolute inset-0 w-full h-full ${viewMode === ViewMode.MAP ? "block z-10" : "hidden z-0"}`}
         >
           <PupoMap
-            locations={pupiData}
+            locations={pupiData || []}
             onSelectLocation={handleSelectPupo}
             selectedLocationId={selectedPupo?.id}
           />

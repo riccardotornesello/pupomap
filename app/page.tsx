@@ -4,11 +4,14 @@ import { PupoLocation } from "@/types"
 import HomeContent from "./content"
 
 export default async function Home() {
-  let pupiData: PupoLocation[] = []
+  let pupiData: PupoLocation[] | null = null
 
   try {
-    // TODO: variable url
-    const response = await fetch("http://localhost:3000/api/pupi")
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000"
+
+    const response = await fetch(`${baseUrl}/api/pupi`)
     if (response.ok) {
       pupiData = await response.json()
     } else {
@@ -18,6 +21,5 @@ export default async function Home() {
     console.error("Error fetching pupi data:", error)
   }
 
-  // TODO: show message if pupiData is empty
   return <HomeContent pupiData={pupiData} />
 }

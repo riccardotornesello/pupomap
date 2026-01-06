@@ -2,10 +2,16 @@
 
 import dynamic from "next/dynamic"
 import { useState, useEffect } from "react"
-import { Map, List, Navigation, LogIn, User as UserIcon } from "lucide-react"
-import { signIn, useSession } from "next-auth/react"
+import {
+  Map,
+  List,
+  Navigation,
+  LogIn,
+  LogOut,
+  User as UserIcon,
+} from "lucide-react"
+import { signIn, signOut, useSession } from "next-auth/react"
 import { PupoCard } from "../components/PupoCard"
-import { INITIAL_VOTES } from "../constants"
 import { PupoLocation, ViewMode, User } from "../types"
 
 const PupoMap = dynamic(() => import("../components/PupoMap"), {
@@ -33,36 +39,112 @@ export const HomeContent: React.FC<HomeContentProps> = ({ pupiData }) => {
       }
     : null
 
-  const [votes, setVotes] = useState<Record<number, number>>(INITIAL_VOTES)
+  const [votes, setVotes] = useState<Record<number, number>>({})
   const [userVotes, setUserVotes] = useState<Set<number>>(new Set())
+
+  // Load votes from API on mount
+  useEffect(() => {
+    const loadVotes = async () => {
+      try {
+        const response = await fetch("/api/votes")
+        if (response.ok) {
+          const data = await response.json()
+          setVotes(data.voteCounts || {})
+          setUserVotes(new Set(data.userVotes || []))
+        }
+      } catch (error) {
+        console.error("Error loading votes:", error)
+      }
+    }
+    loadVotes()
+  }, [])
 
   const handleLogin = () => {
     signIn("google")
   }
 
-  const handleVote = (pupoId: number) => {
+  const handleLogout = () => {
+    signOut()
+  }
+
+  const handleVote = async (pupoId: number) => {
     if (!user) {
       handleLogin()
       return
     }
 
-    setVotes((prev) => {
-      const isVoted = userVotes.has(pupoId)
-      return {
-        ...prev,
-        [pupoId]: isVoted ? prev[pupoId] - 1 : (prev[pupoId] || 0) + 1,
-      }
-    })
+    // Optimistic update
+    const wasVoted = userVotes.has(pupoId)
+    setVotes((prev) => ({
+      ...prev,
+      [pupoId]: wasVoted
+        ? Math.max(0, (prev[pupoId] || 0) - 1)
+        : (prev[pupoId] || 0) + 1,
+    }))
 
     setUserVotes((prev) => {
       const newSet = new Set(prev)
-      if (newSet.has(pupoId)) {
+      if (wasVoted) {
         newSet.delete(pupoId)
       } else {
         newSet.add(pupoId)
       }
       return newSet
     })
+
+    // Call API to persist vote
+    try {
+      const response = await fetch("/api/votes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pupoId }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        // Update with server state
+        setVotes(data.voteCounts || {})
+        setUserVotes(new Set(data.userVotes || []))
+      } else {
+        // Revert optimistic update on error
+        setVotes((prev) => ({
+          ...prev,
+          [pupoId]: wasVoted
+            ? (prev[pupoId] || 0) + 1
+            : Math.max(0, (prev[pupoId] || 0) - 1),
+        }))
+        setUserVotes((prev) => {
+          const newSet = new Set(prev)
+          if (wasVoted) {
+            newSet.add(pupoId)
+          } else {
+            newSet.delete(pupoId)
+          }
+          return newSet
+        })
+        console.error("Failed to update vote")
+      }
+    } catch (error) {
+      // Revert optimistic update on error
+      setVotes((prev) => ({
+        ...prev,
+        [pupoId]: wasVoted
+          ? (prev[pupoId] || 0) + 1
+          : Math.max(0, (prev[pupoId] || 0) - 1),
+      }))
+      setUserVotes((prev) => {
+        const newSet = new Set(prev)
+        if (wasVoted) {
+          newSet.add(pupoId)
+        } else {
+          newSet.delete(pupoId)
+        }
+        return newSet
+      })
+      console.error("Error voting:", error)
+    }
   }
 
   const handleSelectPupo = (pupo: PupoLocation) => {
@@ -126,18 +208,28 @@ export const HomeContent: React.FC<HomeContentProps> = ({ pupiData }) => {
 
         <div>
           {user ? (
-            <div className="flex items-center gap-2 bg-stone-100 px-3 py-1.5 rounded-full border border-stone-200">
-              <div className="w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center">
-                <UserIcon size={14} />
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-stone-100 px-3 py-1.5 rounded-full border border-stone-200">
+                <div className="w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center">
+                  <UserIcon size={14} />
+                </div>
+                <span className="text-sm font-medium text-stone-700 hidden sm:inline">
+                  {user.name}
+                </span>
               </div>
-              <span className="text-sm font-medium text-stone-700 hidden sm:inline">
-                {user.name}
-              </span>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-stone-900 text-white px-4 py-2 rounded-full hover:bg-black transition-colors text-sm font-medium cursor-pointer"
+                title="Esci"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Esci</span>
+              </button>
             </div>
           ) : (
             <button
               onClick={handleLogin}
-              className="flex items-center gap-2 bg-stone-900 text-white px-4 py-2 rounded-full hover:bg-black transition-colors text-sm font-medium"
+              className="flex items-center gap-2 bg-stone-900 text-white px-4 py-2 rounded-full hover:bg-black transition-colors text-sm font-medium cursor-pointer"
             >
               <LogIn className="w-4 h-4" />
               <span className="hidden sm:inline">Accedi con Google</span>

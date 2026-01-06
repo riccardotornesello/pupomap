@@ -4,7 +4,7 @@ export interface PupoLocation {
   description: string
   lat: number
   lng: number
-  imageUrl: string
+  image: string
   artist: string
   theme: string // e.g., Satira Politica, Tradizionale, Fantasia
 }

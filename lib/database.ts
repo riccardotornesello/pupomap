@@ -35,7 +35,7 @@ class SQLiteAdapter implements DatabaseAdapter {
         description TEXT NOT NULL,
         lat REAL NOT NULL,
         lng REAL NOT NULL,
-        imageUrl TEXT NOT NULL,
+        image TEXT NOT NULL,
         artist TEXT NOT NULL,
         theme TEXT NOT NULL
       )
@@ -54,7 +54,7 @@ class SQLiteAdapter implements DatabaseAdapter {
 
   createPupo(pupo: PupoLocation): PupoLocation {
     const stmt = this.db.prepare(`
-      INSERT INTO pupi (name, description, lat, lng, imageUrl, artist, theme)
+      INSERT INTO pupi (name, description, lat, lng, image, artist, theme)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `)
     const result = stmt.run(
@@ -62,7 +62,7 @@ class SQLiteAdapter implements DatabaseAdapter {
       pupo.description,
       pupo.lat,
       pupo.lng,
-      pupo.imageUrl,
+      pupo.image,
       pupo.artist,
       pupo.theme
     )
@@ -79,7 +79,7 @@ class SQLiteAdapter implements DatabaseAdapter {
     const updatedPupo = { ...current, ...updates }
     const stmt = this.db.prepare(`
       UPDATE pupi
-      SET name = ?, description = ?, lat = ?, lng = ?, imageUrl = ?, artist = ?, theme = ?
+      SET name = ?, description = ?, lat = ?, lng = ?, image = ?, artist = ?, theme = ?
       WHERE id = ?
     `)
     stmt.run(
@@ -87,7 +87,7 @@ class SQLiteAdapter implements DatabaseAdapter {
       updatedPupo.description,
       updatedPupo.lat,
       updatedPupo.lng,
-      updatedPupo.imageUrl,
+      updatedPupo.image,
       updatedPupo.artist,
       updatedPupo.theme,
       id
@@ -133,7 +133,7 @@ class PostgreSQLAdapter implements DatabaseAdapter {
           description TEXT NOT NULL,
           lat DOUBLE PRECISION NOT NULL,
           lng DOUBLE PRECISION NOT NULL,
-          imageUrl TEXT NOT NULL,
+          image TEXT NOT NULL,
           artist TEXT NOT NULL,
           theme TEXT NOT NULL
         )
@@ -180,7 +180,7 @@ class PostgreSQLAdapter implements DatabaseAdapter {
   async createPupoAsync(pupo: PupoLocation): Promise<PupoLocation> {
     await this.initialize()
     const result = await this.pool.query(
-      `INSERT INTO pupi (name, description, lat, lng, imageUrl, artist, theme)
+      `INSERT INTO pupi (name, description, lat, lng, image, artist, theme)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
       [
@@ -188,7 +188,7 @@ class PostgreSQLAdapter implements DatabaseAdapter {
         pupo.description,
         pupo.lat,
         pupo.lng,
-        pupo.imageUrl,
+        pupo.image,
         pupo.artist,
         pupo.theme,
       ]
@@ -216,14 +216,14 @@ class PostgreSQLAdapter implements DatabaseAdapter {
     const updatedPupo = { ...current, ...updates }
     await this.pool.query(
       `UPDATE pupi
-       SET name = $1, description = $2, lat = $3, lng = $4, imageUrl = $5, artist = $6, theme = $7
+       SET name = $1, description = $2, lat = $3, lng = $4, image = $5, artist = $6, theme = $7
        WHERE id = $8`,
       [
         updatedPupo.name,
         updatedPupo.description,
         updatedPupo.lat,
         updatedPupo.lng,
-        updatedPupo.imageUrl,
+        updatedPupo.image,
         updatedPupo.artist,
         updatedPupo.theme,
         id,

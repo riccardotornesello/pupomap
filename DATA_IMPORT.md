@@ -20,7 +20,7 @@ To import pupi data, create a JSON file with an array of pupo objects. Each obje
     "description": "Il classico 'Pupo' che rappresenta l'anno vecchio...",
     "lat": 40.0565,
     "lng": 17.978,
-    "imageUrl": "https://example.com/image.jpg",
+    "image": "https://example.com/image.jpg",
     "artist": "Associazione Cartapesta Gallipolina",
     "theme": "Tradizionale"
   }
@@ -33,7 +33,7 @@ To import pupi data, create a JSON file with an array of pupo objects. Each obje
 - `description` (string): Description of the pupo
 - `lat` (number): Latitude coordinate
 - `lng` (number): Longitude coordinate  
-- `imageUrl` (string): URL to the image
+- `image` (string): URL to the image
 - `artist` (string): Name of the artist/creator
 - `theme` (string): Theme category (e.g., "Tradizionale", "Satira Politica", "Fantasia")
 

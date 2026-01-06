@@ -37,9 +37,9 @@ export async function POST(request: NextRequest) {
             pupo.description.trim() === "" ||
             typeof pupo.lat !== "number" ||
             typeof pupo.lng !== "number" ||
-            !pupo.imageUrl ||
-            typeof pupo.imageUrl !== "string" ||
-            pupo.imageUrl.trim() === "" ||
+            !pupo.image ||
+            typeof pupo.image !== "string" ||
+            pupo.image.trim() === "" ||
             !pupo.artist ||
             typeof pupo.artist !== "string" ||
             pupo.artist.trim() === "" ||
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
               {
                 error:
-                  "Each pupo must have: name, description, lat (number), lng (number), imageUrl, artist, theme. All string fields must be non-empty.",
+                  "Each pupo must have: name, description, lat (number), lng (number), image, artist, theme. All string fields must be non-empty.",
               },
               { status: 400 }
             )
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
             description: pupo.description!,
             lat: pupo.lat!,
             lng: pupo.lng!,
-            imageUrl: pupo.imageUrl!,
+            image: pupo.image!,
             artist: pupo.artist!,
             theme: pupo.theme!,
           }))

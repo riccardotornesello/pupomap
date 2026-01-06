@@ -24,7 +24,7 @@ export default function AdminDashboard() {
     description: "",
     lat: "",
     lng: "",
-    imageUrl: "",
+    image: "",
     artist: "",
     theme: "",
   })
@@ -157,7 +157,7 @@ export default function AdminDashboard() {
       description: pupo.description,
       lat: pupo.lat.toString(),
       lng: pupo.lng.toString(),
-      imageUrl: pupo.imageUrl,
+      image: pupo.image,
       artist: pupo.artist,
       theme: pupo.theme,
     })
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
       description: "",
       lat: "",
       lng: "",
-      imageUrl: "",
+      image: "",
       artist: "",
       theme: "",
     })
@@ -231,7 +231,7 @@ export default function AdminDashboard() {
 
       if (response.ok) {
         const data = await response.json()
-        setFormData((prev) => ({ ...prev, imageUrl: data.url }))
+        setFormData((prev) => ({ ...prev, image: data.url }))
       } else {
         const error = await response.json()
         alert(error.error || "Errore durante il caricamento dell'immagine")
@@ -494,9 +494,9 @@ export default function AdminDashboard() {
                   {/* URL input */}
                   <input
                     type="url"
-                    value={formData.imageUrl}
+                    value={formData.image}
                     onChange={(e) =>
-                      setFormData({ ...formData, imageUrl: e.target.value })
+                      setFormData({ ...formData, image: e.target.value })
                     }
                     placeholder="Inserisci URL immagine"
                     className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
@@ -504,10 +504,10 @@ export default function AdminDashboard() {
                   />
 
                   {/* Preview */}
-                  {formData.imageUrl && (
+                  {formData.image && (
                     <div className="mt-3">
                       <img
-                        src={formData.imageUrl}
+                        src={formData.image}
                         alt="Anteprima"
                         className="w-32 h-32 object-cover rounded-lg border border-stone-300"
                       />
@@ -564,7 +564,7 @@ export default function AdminDashboard() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <img
-                          src={pupo.imageUrl}
+                          src={pupo.image}
                           alt={pupo.name}
                           className="w-12 h-12 rounded-lg object-cover"
                         />

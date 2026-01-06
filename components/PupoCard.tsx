@@ -67,7 +67,7 @@ export const PupoCard: React.FC<PupoCardProps> = ({
       <div className="bg-white rounded-xl shadow-md border border-stone-200 overflow-hidden hover:shadow-lg transition-shadow">
         <div className="h-48 overflow-hidden relative group">
           <img
-            src={pupo.imageUrl}
+            src={pupo.image}
             alt={pupo.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
@@ -115,7 +115,7 @@ export const PupoCard: React.FC<PupoCardProps> = ({
       >
         <div className="relative h-64 shrink-0 bg-stone-200">
           <img
-            src={pupo.imageUrl}
+            src={pupo.image}
             alt={pupo.name}
             className="w-full h-full object-cover"
           />

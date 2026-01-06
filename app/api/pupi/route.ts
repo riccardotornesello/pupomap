@@ -25,9 +25,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, description, lat, lng, imageUrl, artist, theme } = body
+    const { name, description, lat, lng, image, artist, theme } = body
 
-    if (!name || !description || !lat || !lng || !imageUrl || !artist || !theme) {
+    if (!name || !description || !lat || !lng || !image || !artist || !theme) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       description,
       lat: parsedLat,
       lng: parsedLng,
-      imageUrl,
+      image,
       artist,
       theme,
     })

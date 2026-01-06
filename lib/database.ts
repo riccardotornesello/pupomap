@@ -15,6 +15,11 @@ interface DatabaseAdapter {
     updates: Partial<Omit<PupoLocation, "id">>
   ): Promise<PupoLocation | null>
   deletePupo(id: number): Promise<boolean>
+  // Vote management
+  addVote(userId: string, pupoId: number): Promise<void>
+  removeVote(userId: string, pupoId: number): Promise<void>
+  getUserVotes(userId: string): Promise<number[]>
+  getVoteCounts(): Promise<Record<number, number>>
   close(): void
 }
 
@@ -38,7 +43,18 @@ class SQLiteAdapter implements DatabaseAdapter {
         image TEXT NOT NULL,
         artist TEXT NOT NULL,
         theme TEXT NOT NULL
-      )
+      );
+
+      CREATE TABLE IF NOT EXISTS votes (
+        user_id TEXT NOT NULL,
+        pupo_id INTEGER NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (user_id, pupo_id),
+        FOREIGN KEY (pupo_id) REFERENCES pupi(id) ON DELETE CASCADE
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_votes_pupo_id ON votes(pupo_id);
+      CREATE INDEX IF NOT EXISTS idx_votes_user_id ON votes(user_id);
     `)
   }
 
@@ -101,6 +117,38 @@ class SQLiteAdapter implements DatabaseAdapter {
     return result.changes > 0
   }
 
+  async addVote(userId: string, pupoId: number): Promise<void> {
+    const stmt = this.db.prepare(
+      "INSERT OR IGNORE INTO votes (user_id, pupo_id) VALUES (?, ?)"
+    )
+    stmt.run(userId, pupoId)
+  }
+
+  async removeVote(userId: string, pupoId: number): Promise<void> {
+    const stmt = this.db.prepare(
+      "DELETE FROM votes WHERE user_id = ? AND pupo_id = ?"
+    )
+    stmt.run(userId, pupoId)
+  }
+
+  async getUserVotes(userId: string): Promise<number[]> {
+    const stmt = this.db.prepare("SELECT pupo_id FROM votes WHERE user_id = ?")
+    const rows = stmt.all(userId) as { pupo_id: number }[]
+    return rows.map((row) => row.pupo_id)
+  }
+
+  async getVoteCounts(): Promise<Record<number, number>> {
+    const stmt = this.db.prepare(
+      "SELECT pupo_id, COUNT(*) as count FROM votes GROUP BY pupo_id"
+    )
+    const rows = stmt.all() as { pupo_id: number; count: number }[]
+    const counts: Record<number, number> = {}
+    for (const row of rows) {
+      counts[row.pupo_id] = row.count
+    }
+    return counts
+  }
+
   close(): void {
     this.db.close()
   }
@@ -136,7 +184,18 @@ class PostgreSQLAdapter implements DatabaseAdapter {
           image TEXT NOT NULL,
           artist TEXT NOT NULL,
           theme TEXT NOT NULL
-        )
+        );
+
+        CREATE TABLE IF NOT EXISTS votes (
+          user_id TEXT NOT NULL,
+          pupo_id INTEGER NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (user_id, pupo_id),
+          FOREIGN KEY (pupo_id) REFERENCES pupi(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_votes_pupo_id ON votes(pupo_id);
+        CREATE INDEX IF NOT EXISTS idx_votes_user_id ON votes(user_id);
       `)
 
       this.initialized = true
@@ -209,6 +268,43 @@ class PostgreSQLAdapter implements DatabaseAdapter {
     await this.initialize()
     const result = await this.pool.query("DELETE FROM pupi WHERE id = $1", [id])
     return result.rowCount !== null && result.rowCount > 0
+  }
+
+  async addVote(userId: string, pupoId: number): Promise<void> {
+    await this.initialize()
+    await this.pool.query(
+      "INSERT INTO votes (user_id, pupo_id) VALUES ($1, $2) ON CONFLICT (user_id, pupo_id) DO NOTHING",
+      [userId, pupoId]
+    )
+  }
+
+  async removeVote(userId: string, pupoId: number): Promise<void> {
+    await this.initialize()
+    await this.pool.query(
+      "DELETE FROM votes WHERE user_id = $1 AND pupo_id = $2",
+      [userId, pupoId]
+    )
+  }
+
+  async getUserVotes(userId: string): Promise<number[]> {
+    await this.initialize()
+    const result = await this.pool.query(
+      "SELECT pupo_id FROM votes WHERE user_id = $1",
+      [userId]
+    )
+    return result.rows.map((row) => row.pupo_id)
+  }
+
+  async getVoteCounts(): Promise<Record<number, number>> {
+    await this.initialize()
+    const result = await this.pool.query(
+      "SELECT pupo_id, COUNT(*) as count FROM votes GROUP BY pupo_id"
+    )
+    const counts: Record<number, number> = {}
+    for (const row of result.rows) {
+      counts[row.pupo_id] = parseInt(row.count, 10)
+    }
+    return counts
   }
 
   close(): void {

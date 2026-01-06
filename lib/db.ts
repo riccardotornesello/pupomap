@@ -65,3 +65,50 @@ export async function bulkImportPupi(
 
   return { success, failed, errors }
 }
+
+// Vote management
+export async function addVote(
+  userId: string,
+  pupoId: number
+): Promise<void> {
+  const db = getDatabase()
+  try {
+    await db.addVote(userId, pupoId)
+  } catch (error) {
+    console.error("Error adding vote:", error)
+    throw error
+  }
+}
+
+export async function removeVote(
+  userId: string,
+  pupoId: number
+): Promise<void> {
+  const db = getDatabase()
+  try {
+    await db.removeVote(userId, pupoId)
+  } catch (error) {
+    console.error("Error removing vote:", error)
+    throw error
+  }
+}
+
+export async function getUserVotes(userId: string): Promise<number[]> {
+  const db = getDatabase()
+  try {
+    return await db.getUserVotes(userId)
+  } catch (error) {
+    console.error("Error getting user votes:", error)
+    return []
+  }
+}
+
+export async function getVoteCounts(): Promise<Record<number, number>> {
+  const db = getDatabase()
+  try {
+    return await db.getVoteCounts()
+  } catch (error) {
+    console.error("Error getting vote counts:", error)
+    return {}
+  }
+}

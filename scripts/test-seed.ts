@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { insertBulkPupi, getAllPupi } from "../lib/drizzle-db.js"
+import { insertBulkPupi, getAllPupi } from "../lib/db"
 import fs from "fs"
 import path from "path"
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { getAllPupi, createPupo, getPupoById, updatePupo, deletePupo, insertBulkPupi } from "../lib/drizzle-db.js"
+import { getAllPupi, createPupo, getPupoById, updatePupo, deletePupo, insertBulkPupi } from "../lib/db"
 
 async function testDatabase() {
   console.log("Testing database operations...")

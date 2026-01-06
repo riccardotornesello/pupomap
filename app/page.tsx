@@ -7,6 +7,7 @@ export default async function Home() {
   let pupiData: PupoLocation[] = []
 
   try {
+    // TODO: variable url
     const response = await fetch("http://localhost:3000/api/pupi")
     if (response.ok) {
       pupiData = await response.json()
@@ -17,5 +18,6 @@ export default async function Home() {
     console.error("Error fetching pupi data:", error)
   }
 
+  // TODO: show message if pupiData is empty
   return <HomeContent pupiData={pupiData} />
 }

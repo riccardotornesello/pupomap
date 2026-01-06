@@ -1,5 +1,5 @@
 export interface PupoLocation {
-  id: string
+  id: number
   name: string
   description: string
   lat: number

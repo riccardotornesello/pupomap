@@ -1,13 +1,11 @@
 import { sqliteTable, text, real } from "drizzle-orm/sqlite-core"
 import { pgTable, text as pgText, doublePrecision } from "drizzle-orm/pg-core"
+import { isPostgresUrl } from "./db-config"
 
-// Check which database we're using
+// Use conditional export to provide the right schema based on database type
 const databaseUrl = process.env.DATABASE_URL
-const isPostgres = 
-  databaseUrl && 
-  (databaseUrl.startsWith("postgres://") || databaseUrl.startsWith("postgresql://"))
+const isPostgres = isPostgresUrl(databaseUrl)
 
-// Use conditional export to provide the right schema
 export const pupi = isPostgres
   ? pgTable("pupi", {
       id: pgText("id").primaryKey(),

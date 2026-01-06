@@ -1,12 +1,8 @@
 import { defineConfig } from "drizzle-kit"
+import { isPostgresUrl } from "./lib/db-config"
 
 const databaseUrl = process.env.DATABASE_URL
-
-// Determine if we're using PostgreSQL or SQLite
-const isPostgres = databaseUrl && (
-  databaseUrl.startsWith("postgres://") || 
-  databaseUrl.startsWith("postgresql://")
-)
+const isPostgres = isPostgresUrl(databaseUrl)
 
 export default defineConfig({
   schema: "./lib/schema.ts",

@@ -13,9 +13,11 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 The application supports both PostgreSQL and SQLite databases:
 
 #### Using SQLite (Default)
+
 If no `DATABASE_URL` is configured, the application will automatically use SQLite with the database file stored at `data/pupi.db`. No additional setup required!
 
 #### Using PostgreSQL
+
 1. Set up a PostgreSQL database
 2. Configure the `DATABASE_URL` in your `.env.local`:
    ```bash
@@ -23,6 +25,7 @@ If no `DATABASE_URL` is configured, the application will automatically use SQLit
    ```
 
 **Note:** The database schema will be automatically created on first run. **The database starts empty** - no default data is seeded. You can import data via:
+
 - Manual entry through the admin panel
 - Bulk import via JSON file upload (see [Data Import Guide](./DATA_IMPORT.md))
 
@@ -109,6 +112,7 @@ For more information, see the [Vercel Blob documentation](https://vercel.com/doc
 If Vercel Blob is not configured, you can still provide image URLs manually.
 
 **Security Note:** The current implementation uses a simple password-based authentication suitable for single-admin use cases. For production deployments:
+
 - Always use HTTPS to encrypt credentials in transit
 - Consider implementing proper session management with JWT tokens
 - Regularly rotate the admin password

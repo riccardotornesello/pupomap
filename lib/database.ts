@@ -7,14 +7,14 @@ import fs from "fs"
 // Database interface for abstraction
 interface DatabaseAdapter {
   initialize(): void | Promise<void>
-  getAllPupi(): PupoLocation[]
-  getPupoById(id: number): PupoLocation | undefined
-  createPupo(pupo: PupoLocation): PupoLocation
+  getAllPupi(): Promise<PupoLocation[]>
+  getPupoById(id: number): Promise<PupoLocation | undefined>
+  createPupo(pupo: PupoLocation): Promise<PupoLocation>
   updatePupo(
     id: number,
     updates: Partial<Omit<PupoLocation, "id">>
-  ): PupoLocation | null
-  deletePupo(id: number): boolean
+  ): Promise<PupoLocation | null>
+  deletePupo(id: number): Promise<boolean>
   close(): void
 }
 
@@ -42,17 +42,17 @@ class SQLiteAdapter implements DatabaseAdapter {
     `)
   }
 
-  getAllPupi(): PupoLocation[] {
+  async getAllPupi(): Promise<PupoLocation[]> {
     const stmt = this.db.prepare("SELECT * FROM pupi")
     return stmt.all() as PupoLocation[]
   }
 
-  getPupoById(id: number): PupoLocation | undefined {
+  async getPupoById(id: number): Promise<PupoLocation | undefined> {
     const stmt = this.db.prepare("SELECT * FROM pupi WHERE id = ?")
     return stmt.get(id) as PupoLocation | undefined
   }
 
-  createPupo(pupo: PupoLocation): PupoLocation {
+  async createPupo(pupo: PupoLocation): Promise<PupoLocation> {
     const stmt = this.db.prepare(`
       INSERT INTO pupi (name, description, lat, lng, image, artist, theme)
       VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -69,11 +69,11 @@ class SQLiteAdapter implements DatabaseAdapter {
     return { ...pupo, id: result.lastInsertRowid as number }
   }
 
-  updatePupo(
+  async updatePupo(
     id: number,
     updates: Partial<Omit<PupoLocation, "id">>
-  ): PupoLocation | null {
-    const current = this.getPupoById(id)
+  ): Promise<PupoLocation | null> {
+    const current = await this.getPupoById(id)
     if (!current) return null
 
     const updatedPupo = { ...current, ...updates }
@@ -95,7 +95,7 @@ class SQLiteAdapter implements DatabaseAdapter {
     return updatedPupo
   }
 
-  deletePupo(id: number): boolean {
+  async deletePupo(id: number): Promise<boolean> {
     const stmt = this.db.prepare("DELETE FROM pupi WHERE id = ?")
     const result = stmt.run(id)
     return result.changes > 0
@@ -145,25 +145,13 @@ class PostgreSQLAdapter implements DatabaseAdapter {
     }
   }
 
-  getAllPupi(): PupoLocation[] {
-    throw new Error(
-      "Synchronous methods not supported for PostgreSQL. Use async operations."
-    )
-  }
-
-  async getAllPupiAsync(): Promise<PupoLocation[]> {
+  async getAllPupi(): Promise<PupoLocation[]> {
     await this.initialize()
     const result = await this.pool.query("SELECT * FROM pupi")
     return result.rows as PupoLocation[]
   }
 
-  getPupoById(_id: number): PupoLocation | undefined {
-    throw new Error(
-      "Synchronous methods not supported for PostgreSQL. Use async operations."
-    )
-  }
-
-  async getPupoByIdAsync(id: number): Promise<PupoLocation | undefined> {
+  async getPupoById(id: number): Promise<PupoLocation | undefined> {
     await this.initialize()
     const result = await this.pool.query("SELECT * FROM pupi WHERE id = $1", [
       id,
@@ -171,13 +159,7 @@ class PostgreSQLAdapter implements DatabaseAdapter {
     return result.rows[0] as PupoLocation | undefined
   }
 
-  createPupo(_pupo: PupoLocation): PupoLocation {
-    throw new Error(
-      "Synchronous methods not supported for PostgreSQL. Use async operations."
-    )
-  }
-
-  async createPupoAsync(pupo: PupoLocation): Promise<PupoLocation> {
+  async createPupo(pupo: PupoLocation): Promise<PupoLocation> {
     await this.initialize()
     const result = await this.pool.query(
       `INSERT INTO pupi (name, description, lat, lng, image, artist, theme)
@@ -196,21 +178,12 @@ class PostgreSQLAdapter implements DatabaseAdapter {
     return { ...pupo, id: result.rows[0].id }
   }
 
-  updatePupo(
-    _id: number,
-    _updates: Partial<Omit<PupoLocation, "id">>
-  ): PupoLocation | null {
-    throw new Error(
-      "Synchronous methods not supported for PostgreSQL. Use async operations."
-    )
-  }
-
-  async updatePupoAsync(
+  async updatePupo(
     id: number,
     updates: Partial<Omit<PupoLocation, "id">>
   ): Promise<PupoLocation | null> {
     await this.initialize()
-    const current = await this.getPupoByIdAsync(id)
+    const current = await this.getPupoById(id)
     if (!current) return null
 
     const updatedPupo = { ...current, ...updates }
@@ -232,17 +205,9 @@ class PostgreSQLAdapter implements DatabaseAdapter {
     return updatedPupo
   }
 
-  deletePupo(_id: number): boolean {
-    throw new Error(
-      "Synchronous methods not supported for PostgreSQL. Use async operations."
-    )
-  }
-
-  async deletePupoAsync(id: number): Promise<boolean> {
+  async deletePupo(id: number): Promise<boolean> {
     await this.initialize()
-    const result = await this.pool.query("DELETE FROM pupi WHERE id = $1", [
-      id,
-    ])
+    const result = await this.pool.query("DELETE FROM pupi WHERE id = $1", [id])
     return result.rowCount !== null && result.rowCount > 0
   }
 
@@ -268,7 +233,10 @@ function createDatabaseAdapter(): DatabaseAdapter {
     return adapter
   }
 
-  if (databaseUrl.startsWith("postgres://") || databaseUrl.startsWith("postgresql://")) {
+  if (
+    databaseUrl.startsWith("postgres://") ||
+    databaseUrl.startsWith("postgresql://")
+  ) {
     console.log("Using PostgreSQL database")
     return new PostgreSQLAdapter(databaseUrl)
   }
@@ -296,10 +264,4 @@ export function getDatabase(): DatabaseAdapter {
     dbInstance = createDatabaseAdapter()
   }
   return dbInstance
-}
-
-export function isPostgreSQL(
-  db: DatabaseAdapter
-): db is PostgreSQLAdapter {
-  return db instanceof PostgreSQLAdapter
 }

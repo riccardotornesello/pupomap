@@ -14,10 +14,7 @@ export async function POST(request: NextRequest) {
 
     // Check password against environment variable
     if (password !== process.env.ADMIN_PASSWORD) {
-      return NextResponse.json(
-        { error: "Invalid password" },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "Invalid password" }, { status: 401 })
     }
 
     // Return success

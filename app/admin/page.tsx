@@ -37,7 +37,7 @@ export default function AdminDashboard() {
       router.push("/admin/login")
       return
     }
-    
+
     // Validate password with server
     fetch("/api/admin/login", {
       method: "POST",
@@ -124,9 +124,7 @@ export default function AdminDashboard() {
     if (!adminPassword) return
 
     try {
-      const url = editingPupo
-        ? `/api/pupi/${editingPupo.id}`
-        : "/api/pupi"
+      const url = editingPupo ? `/api/pupi/${editingPupo.id}` : "/api/pupi"
       const method = editingPupo ? "PUT" : "POST"
 
       const response = await fetch(url, {
@@ -380,9 +378,7 @@ export default function AdminDashboard() {
                     className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700"
                   >
                     <MapPin size={16} />
-                    {showMapPicker
-                      ? "Nascondi mappa"
-                      : "Scegli sulla mappa"}
+                    {showMapPicker ? "Nascondi mappa" : "Scegli sulla mappa"}
                   </button>
                 </div>
 

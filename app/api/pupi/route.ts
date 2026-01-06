@@ -7,10 +7,7 @@ export async function GET() {
     return NextResponse.json(pupi)
   } catch (error) {
     console.error("Error fetching pupi:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch pupi" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to fetch pupi" }, { status: 500 })
   }
 }
 

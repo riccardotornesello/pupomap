@@ -8,11 +8,11 @@ export async function GET(
   try {
     const { id } = await params
     const numericId = parseInt(id, 10)
-    
+
     if (isNaN(numericId)) {
       return NextResponse.json({ error: "Invalid ID format" }, { status: 400 })
     }
-    
+
     const pupo = await getPupoById(numericId)
 
     if (!pupo) {
@@ -22,10 +22,7 @@ export async function GET(
     return NextResponse.json(pupo)
   } catch (error) {
     console.error("Error fetching pupo:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch pupo" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to fetch pupo" }, { status: 500 })
   }
 }
 
@@ -43,11 +40,11 @@ export async function PUT(
 
     const { id } = await params
     const numericId = parseInt(id, 10)
-    
+
     if (isNaN(numericId)) {
       return NextResponse.json({ error: "Invalid ID format" }, { status: 400 })
     }
-    
+
     const body = await request.json()
 
     const updatedPupo = await updatePupo(numericId, body)
@@ -80,11 +77,11 @@ export async function DELETE(
 
     const { id } = await params
     const numericId = parseInt(id, 10)
-    
+
     if (isNaN(numericId)) {
       return NextResponse.json({ error: "Invalid ID format" }, { status: 400 })
     }
-    
+
     const deleted = await deletePupo(numericId)
 
     if (!deleted) {

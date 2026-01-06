@@ -5,6 +5,7 @@ This document explains how to import data into the Pupomap application via JSON 
 ## Database Changes
 
 The application now uses:
+
 - **INTEGER** IDs (auto-incrementing) instead of TEXT IDs
 - **No automatic data seeding** - database starts empty
 - **JSON file upload** for bulk data import via admin panel
@@ -32,7 +33,7 @@ To import pupi data, create a JSON file with an array of pupo objects. Each obje
 - `name` (string): Name of the pupo
 - `description` (string): Description of the pupo
 - `lat` (number): Latitude coordinate
-- `lng` (number): Longitude coordinate  
+- `lng` (number): Longitude coordinate
 - `image` (string): URL to the image
 - `artist` (string): Name of the artist/creator
 - `theme` (string): Theme category (e.g., "Tradizionale", "Satira Politica", "Fantasia")
@@ -55,6 +56,7 @@ To import pupi data, create a JSON file with an array of pupo objects. Each obje
 A sample data file `sample-data.json` is provided in the repository root. This contains example pupi from Gallipoli, Italy.
 
 To import the sample data:
+
 1. Go to the admin panel
 2. Click "Importa JSON"
 3. Select `sample-data.json`

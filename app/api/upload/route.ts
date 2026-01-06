@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     if (contentType.includes("application/json")) {
       try {
         const body = await request.json()
-        
+
         // Validate that it's an array
         if (!Array.isArray(body)) {
           return NextResponse.json(
@@ -123,8 +123,7 @@ export async function POST(request: NextRequest) {
       const timestamp = Date.now()
       const randomSuffix = Math.random().toString(36).substring(2, 9)
       const filenameParts = file.name.split(".")
-      const extension =
-        filenameParts.length > 1 ? filenameParts.pop() : "jpg"
+      const extension = filenameParts.length > 1 ? filenameParts.pop() : "jpg"
       const filename = `pupi/${timestamp}-${randomSuffix}.${extension}`
 
       // Upload to Vercel Blob
@@ -136,10 +135,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ url: blob.url }, { status: 200 })
     }
 
-    return NextResponse.json(
-      { error: "Invalid content type" },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: "Invalid content type" }, { status: 400 })
   } catch (error) {
     console.error("Error in upload endpoint:", error)
     return NextResponse.json(

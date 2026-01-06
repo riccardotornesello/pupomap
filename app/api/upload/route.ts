@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { Storage } from "@google-cloud/storage"
+import { put } from "@vercel/blob"
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,10 +9,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if GCS is configured
-    if (!process.env.GCS_BUCKET_NAME) {
+    // Check if Vercel Blob is configured
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
       return NextResponse.json(
-        { error: "Google Cloud Storage not configured" },
+        { error: "Vercel Blob not configured" },
         { status: 503 }
       )
     }
@@ -40,27 +40,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Initialize Google Cloud Storage
-    let credentials
-    try {
-      credentials = process.env.GCS_CREDENTIALS
-        ? JSON.parse(process.env.GCS_CREDENTIALS)
-        : undefined
-    } catch (error) {
-      console.error("Error parsing GCS_CREDENTIALS:", error)
-      return NextResponse.json(
-        { error: "Invalid GCS configuration" },
-        { status: 500 }
-      )
-    }
-
-    const storage = new Storage({
-      projectId: process.env.GCS_PROJECT_ID,
-      credentials,
-    })
-
-    const bucket = storage.bucket(process.env.GCS_BUCKET_NAME)
-
     // Generate unique filename
     const timestamp = Date.now()
     const randomSuffix = Math.random().toString(36).substring(2, 9)
@@ -68,23 +47,13 @@ export async function POST(request: NextRequest) {
     const extension = filenameParts.length > 1 ? filenameParts.pop() : "jpg"
     const filename = `pupi/${timestamp}-${randomSuffix}.${extension}`
 
-    // Convert File to Buffer
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-
-    // Upload to GCS
-    const gcsFile = bucket.file(filename)
-    await gcsFile.save(buffer, {
-      metadata: {
-        contentType: file.type,
-      },
-      public: true,
+    // Upload to Vercel Blob
+    const blob = await put(filename, file, {
+      access: "public",
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     })
 
-    // Get public URL
-    const publicUrl = `https://storage.googleapis.com/${process.env.GCS_BUCKET_NAME}/${filename}`
-
-    return NextResponse.json({ url: publicUrl }, { status: 200 })
+    return NextResponse.json({ url: blob.url }, { status: 200 })
   } catch (error) {
     console.error("Error uploading file:", error)
     return NextResponse.json(

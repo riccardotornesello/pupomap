@@ -2,8 +2,15 @@
 
 import dynamic from "next/dynamic"
 import { useState, useEffect } from "react"
-import { Map, List, Navigation, LogIn, User as UserIcon } from "lucide-react"
-import { signIn, useSession } from "next-auth/react"
+import {
+  Map,
+  List,
+  Navigation,
+  LogIn,
+  LogOut,
+  User as UserIcon,
+} from "lucide-react"
+import { signIn, signOut, useSession } from "next-auth/react"
 import { PupoCard } from "../components/PupoCard"
 import { PupoLocation, ViewMode, User } from "../types"
 
@@ -54,6 +61,10 @@ export const HomeContent: React.FC<HomeContentProps> = ({ pupiData }) => {
 
   const handleLogin = () => {
     signIn("google")
+  }
+
+  const handleLogout = () => {
+    signOut()
   }
 
   const handleVote = async (pupoId: number) => {
@@ -197,18 +208,28 @@ export const HomeContent: React.FC<HomeContentProps> = ({ pupiData }) => {
 
         <div>
           {user ? (
-            <div className="flex items-center gap-2 bg-stone-100 px-3 py-1.5 rounded-full border border-stone-200">
-              <div className="w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center">
-                <UserIcon size={14} />
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-stone-100 px-3 py-1.5 rounded-full border border-stone-200">
+                <div className="w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center">
+                  <UserIcon size={14} />
+                </div>
+                <span className="text-sm font-medium text-stone-700 hidden sm:inline">
+                  {user.name}
+                </span>
               </div>
-              <span className="text-sm font-medium text-stone-700 hidden sm:inline">
-                {user.name}
-              </span>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-stone-900 text-white px-4 py-2 rounded-full hover:bg-black transition-colors text-sm font-medium cursor-pointer"
+                title="Esci"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Esci</span>
+              </button>
             </div>
           ) : (
             <button
               onClick={handleLogin}
-              className="flex items-center gap-2 bg-stone-900 text-white px-4 py-2 rounded-full hover:bg-black transition-colors text-sm font-medium"
+              className="flex items-center gap-2 bg-stone-900 text-white px-4 py-2 rounded-full hover:bg-black transition-colors text-sm font-medium cursor-pointer"
             >
               <LogIn className="w-4 h-4" />
               <span className="hidden sm:inline">Accedi con Google</span>

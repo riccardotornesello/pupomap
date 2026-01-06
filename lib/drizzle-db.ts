@@ -8,12 +8,11 @@ import { PupoLocation } from "@/types"
 import path from "path"
 import fs from "fs"
 
-type DrizzleDB =
-  | ReturnType<typeof drizzleSqlite<{ pupi: typeof pupi }>>
-  | ReturnType<typeof drizzlePostgres<{ pupi: typeof pupi }>>
+type SqliteDB = ReturnType<typeof drizzleSqlite<{ pupi: typeof pupi }>>
+type PostgresDB = ReturnType<typeof drizzlePostgres<{ pupi: typeof pupi }>>
 
 interface DatabaseConnection {
-  db: DrizzleDB
+  db: SqliteDB | PostgresDB
   isPostgres: boolean
 }
 
@@ -78,7 +77,8 @@ export function getDb(): DatabaseConnection {
 export async function getAllPupi(): Promise<PupoLocation[]> {
   const { db } = getDb()
   try {
-    const results = await db.select().from(pupi)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const results = await (db as any).select().from(pupi)
     return results as PupoLocation[]
   } catch (error) {
     console.error("Error reading pupi data:", error)
@@ -91,7 +91,8 @@ export async function getPupoById(
 ): Promise<PupoLocation | undefined> {
   const { db } = getDb()
   try {
-    const results = await db
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const results = await (db as any)
       .select()
       .from(pupi)
       .where(eq(pupi.id, id))
@@ -114,7 +115,8 @@ export async function createPupo(
     id: `${Date.now()}-${randomSuffix}`,
   }
 
-  await db.insert(pupi).values(newPupo)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (db as any).insert(pupi).values(newPupo)
   return newPupo
 }
 
@@ -127,7 +129,8 @@ export async function updatePupo(
   if (!current) return null
 
   const updatedPupo = { ...current, ...updates }
-  await db
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (db as any)
     .update(pupi)
     .set(updates)
     .where(eq(pupi.id, id))
@@ -136,7 +139,8 @@ export async function updatePupo(
 
 export async function deletePupo(id: string): Promise<boolean> {
   const { db } = getDb()
-  await db
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (db as any)
     .delete(pupi)
     .where(eq(pupi.id, id))
   // Check if the pupo still exists to determine success
@@ -149,7 +153,8 @@ export async function insertBulkPupi(pupiData: PupoLocation[]): Promise<void> {
   if (pupiData.length === 0) return
 
   try {
-    await db.insert(pupi).values(pupiData)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (db as any).insert(pupi).values(pupiData)
   } catch (error) {
     console.error("Error inserting bulk pupi:", error)
     throw error

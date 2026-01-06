@@ -11,9 +11,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { pupi, clearExisting } = body as {
+    const { pupi } = body as {
       pupi: PupoLocation[]
-      clearExisting?: boolean
     }
 
     if (!Array.isArray(pupi)) {
@@ -44,10 +43,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // If clearExisting is true, we'll need to delete all existing data
-    // For now, we'll just insert new data (admin can manually delete if needed)
-    // This avoids accidental data loss
-
+    // Insert the new data (admin can manually delete existing pupi if needed)
     await insertBulkPupi(pupi)
 
     const allPupi = await getAllPupi()

@@ -1,6 +1,8 @@
 import { PupoLocation } from "./types"
 
-// Mock data representing locations in Gallipoli, Italy
+// Sample data representing locations in Gallipoli, Italy
+// Note: This data is kept for reference. The database no longer seeds automatically.
+// To import this data, use the JSON import feature in the admin panel or the seed-data.json file.
 export const PUPI_DATA: PupoLocation[] = [
   {
     id: "1",

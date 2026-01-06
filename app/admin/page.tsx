@@ -407,7 +407,7 @@ export default function AdminDashboard() {
                       <span className="text-sm text-stone-600">
                         {uploading
                           ? "Caricamento..."
-                          : "Carica immagine su Google Cloud"}
+                          : "Carica immagine su Vercel Blob"}
                       </span>
                     </label>
                     <input

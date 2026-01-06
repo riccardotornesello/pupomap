@@ -2,20 +2,19 @@ import { drizzle as drizzleSqlite } from "drizzle-orm/better-sqlite3"
 import { drizzle as drizzlePostgres } from "drizzle-orm/postgres-js"
 import Database from "better-sqlite3"
 import postgres from "postgres"
-import { pupiSqlite, pupiPostgres } from "./schema"
+import { pupi } from "./schema"
 import { eq } from "drizzle-orm"
 import { PupoLocation } from "@/types"
 import path from "path"
 import fs from "fs"
 
 type DrizzleDB =
-  | ReturnType<typeof drizzleSqlite<{ pupi: typeof pupiSqlite }>>
-  | ReturnType<typeof drizzlePostgres<{ pupi: typeof pupiPostgres }>>
+  | ReturnType<typeof drizzleSqlite<{ pupi: typeof pupi }>>
+  | ReturnType<typeof drizzlePostgres<{ pupi: typeof pupi }>>
 
 interface DatabaseConnection {
   db: DrizzleDB
   isPostgres: boolean
-  pupiTable: typeof pupiSqlite | typeof pupiPostgres
 }
 
 let dbConnection: DatabaseConnection | null = null
@@ -33,8 +32,8 @@ function initializeDatabaseConnection(): DatabaseConnection {
     const dbPath = path.join(dataDir, "pupi.db")
     const sqlite = new Database(dbPath)
     sqlite.pragma("journal_mode = WAL")
-    const db = drizzleSqlite(sqlite, { schema: { pupi: pupiSqlite } })
-    return { db, isPostgres: false, pupiTable: pupiSqlite }
+    const db = drizzleSqlite(sqlite, { schema: { pupi } })
+    return { db, isPostgres: false }
   }
 
   if (
@@ -48,8 +47,8 @@ function initializeDatabaseConnection(): DatabaseConnection {
           ? { rejectUnauthorized: false }
           : undefined,
     })
-    const db = drizzlePostgres(queryClient, { schema: { pupi: pupiPostgres } })
-    return { db, isPostgres: true, pupiTable: pupiPostgres }
+    const db = drizzlePostgres(queryClient, { schema: { pupi } })
+    return { db, isPostgres: true }
   }
 
   if (databaseUrl.startsWith("sqlite://") || databaseUrl.startsWith("file:")) {
@@ -57,16 +56,16 @@ function initializeDatabaseConnection(): DatabaseConnection {
     const dbPath = databaseUrl.replace(/^(sqlite:\/\/|file:)/, "")
     const sqlite = new Database(dbPath)
     sqlite.pragma("journal_mode = WAL")
-    const db = drizzleSqlite(sqlite, { schema: { pupi: pupiSqlite } })
-    return { db, isPostgres: false, pupiTable: pupiSqlite }
+    const db = drizzleSqlite(sqlite, { schema: { pupi } })
+    return { db, isPostgres: false }
   }
 
   // Default: treat as SQLite path
   console.log("Using SQLite database")
   const sqlite = new Database(databaseUrl)
   sqlite.pragma("journal_mode = WAL")
-  const db = drizzleSqlite(sqlite, { schema: { pupi: pupiSqlite } })
-  return { db, isPostgres: false, pupiTable: pupiSqlite }
+  const db = drizzleSqlite(sqlite, { schema: { pupi } })
+  return { db, isPostgres: false }
 }
 
 export function getDb(): DatabaseConnection {
@@ -77,9 +76,9 @@ export function getDb(): DatabaseConnection {
 }
 
 export async function getAllPupi(): Promise<PupoLocation[]> {
-  const { db, pupiTable } = getDb()
+  const { db } = getDb()
   try {
-    const results = await db.select().from(pupiTable as any)
+    const results = await db.select().from(pupi)
     return results as PupoLocation[]
   } catch (error) {
     console.error("Error reading pupi data:", error)
@@ -90,12 +89,12 @@ export async function getAllPupi(): Promise<PupoLocation[]> {
 export async function getPupoById(
   id: string
 ): Promise<PupoLocation | undefined> {
-  const { db, pupiTable } = getDb()
+  const { db } = getDb()
   try {
     const results = await db
       .select()
-      .from(pupiTable as any)
-      .where(eq((pupiTable as any).id, id))
+      .from(pupi)
+      .where(eq(pupi.id, id))
       .limit(1)
     return results[0] as PupoLocation | undefined
   } catch (error) {
@@ -107,7 +106,7 @@ export async function getPupoById(
 export async function createPupo(
   pupo: Omit<PupoLocation, "id">
 ): Promise<PupoLocation> {
-  const { db, pupiTable } = getDb()
+  const { db } = getDb()
   // Generate a more robust ID using timestamp + random string
   const randomSuffix = Math.random().toString(36).substring(2, 9)
   const newPupo = {
@@ -115,7 +114,7 @@ export async function createPupo(
     id: `${Date.now()}-${randomSuffix}`,
   }
 
-  await db.insert(pupiTable as any).values(newPupo)
+  await db.insert(pupi).values(newPupo)
   return newPupo
 }
 
@@ -123,35 +122,34 @@ export async function updatePupo(
   id: string,
   updates: Partial<Omit<PupoLocation, "id">>
 ): Promise<PupoLocation | null> {
-  const { db, pupiTable } = getDb()
+  const { db } = getDb()
   const current = await getPupoById(id)
   if (!current) return null
 
   const updatedPupo = { ...current, ...updates }
   await db
-    .update(pupiTable as any)
+    .update(pupi)
     .set(updates)
-    .where(eq((pupiTable as any).id, id))
+    .where(eq(pupi.id, id))
   return updatedPupo
 }
 
 export async function deletePupo(id: string): Promise<boolean> {
-  const { db, pupiTable } = getDb()
-  const result = await db
-    .delete(pupiTable as any)
-    .where(eq((pupiTable as any).id, id))
-  // Note: Drizzle doesn't return rowCount consistently across drivers
-  // We'll check if the pupo still exists to determine success
+  const { db } = getDb()
+  await db
+    .delete(pupi)
+    .where(eq(pupi.id, id))
+  // Check if the pupo still exists to determine success
   const check = await getPupoById(id)
   return check === undefined
 }
 
-export async function insertBulkPupi(pupi: PupoLocation[]): Promise<void> {
-  const { db, pupiTable } = getDb()
-  if (pupi.length === 0) return
+export async function insertBulkPupi(pupiData: PupoLocation[]): Promise<void> {
+  const { db } = getDb()
+  if (pupiData.length === 0) return
 
   try {
-    await db.insert(pupiTable as any).values(pupi)
+    await db.insert(pupi).values(pupiData)
   } catch (error) {
     console.error("Error inserting bulk pupi:", error)
     throw error

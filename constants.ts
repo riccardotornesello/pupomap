@@ -1,9 +1,10 @@
 import { PupoLocation } from "./types"
 
 // Mock data representing locations in Gallipoli, Italy
+// This data is no longer automatically seeded - it can be imported via JSON upload in admin panel
 export const PUPI_DATA: PupoLocation[] = [
   {
-    id: "1",
+    id: 1,
     name: "Il Vecchione di Corso Roma",
     description:
       "Il classico 'Pupo' che rappresenta l'anno vecchio che se ne va. Situato nel cuore dello shopping gallipolino, questo gigante di cartapesta è circondato da simboli satirici degli eventi dell'anno.",
@@ -14,7 +15,7 @@ export const PUPI_DATA: PupoLocation[] = [
     theme: "Tradizionale",
   },
   {
-    id: "2",
+    id: 2,
     name: "Sbarco nel Centro Storico",
     description:
       "Posizionato vicino al ponte antico, questo pupo accoglie i visitatori con una scena ironica sulla politica locale. I dettagli dei volti sono incredibilmente realistici.",
@@ -25,7 +26,7 @@ export const PUPI_DATA: PupoLocation[] = [
     theme: "Satira Politica",
   },
   {
-    id: "3",
+    id: 3,
     name: "La Festa alla Stazione",
     description:
       "Situato nel piazzale della stazione ferroviaria, un'esplosione di colori che rappresenta la speranza per il nuovo anno. Include fuochi d'artificio simulati in cartapesta.",
@@ -36,7 +37,7 @@ export const PUPI_DATA: PupoLocation[] = [
     theme: "Fantasia",
   },
   {
-    id: "4",
+    id: 4,
     name: "Il Pescatore di Sogni",
     description:
       "Vicino al porto, questo pupo rende omaggio alla tradizione marittima della città, mescolando elementi marini con la classica figura del vecchio anno.",
@@ -47,7 +48,7 @@ export const PUPI_DATA: PupoLocation[] = [
     theme: "Cultura Locale",
   },
   {
-    id: "5",
+    id: 5,
     name: "Lo Scoppio di Piazza Tellini",
     description:
       "Uno dei pupi più grandi, famoso per essere riempito (simbolicamente) di petardi. Rappresenta le tasse e le difficoltà economiche che vogliamo lasciarci alle spalle.",
@@ -68,10 +69,10 @@ export const GALLIPOLI_BOUNDS: [[number, number], [number, number]] = [
 ]
 
 // Initial mock votes
-export const INITIAL_VOTES: Record<string, number> = {
-  "1": 42,
-  "2": 156,
-  "3": 89,
-  "4": 230,
-  "5": 12,
+export const INITIAL_VOTES: Record<number, number> = {
+  1: 42,
+  2: 156,
+  3: 89,
+  4: 230,
+  5: 12,
 }

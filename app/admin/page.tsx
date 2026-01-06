@@ -164,7 +164,7 @@ export default function AdminDashboard() {
     setShowForm(true)
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (!adminPassword) return
     if (!confirm("Sei sicuro di voler eliminare questo pupo?")) return
 

@@ -33,14 +33,14 @@ export const HomeContent: React.FC<HomeContentProps> = ({ pupiData }) => {
       }
     : null
 
-  const [votes, setVotes] = useState<Record<string, number>>(INITIAL_VOTES)
-  const [userVotes, setUserVotes] = useState<Set<string>>(new Set())
+  const [votes, setVotes] = useState<Record<number, number>>(INITIAL_VOTES)
+  const [userVotes, setUserVotes] = useState<Set<number>>(new Set())
 
   const handleLogin = () => {
     signIn("google")
   }
 
-  const handleVote = (pupoId: string) => {
+  const handleVote = (pupoId: number) => {
     if (!user) {
       handleLogin()
       return

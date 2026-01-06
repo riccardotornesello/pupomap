@@ -9,7 +9,7 @@ interface PupoCardProps {
   votes: number
   hasVoted: boolean
   currentUser: User | null
-  onVote: (id: string) => void
+  onVote: (id: number) => void
   onLogin: () => void
   onClose: () => void
   onViewOnMap?: () => void

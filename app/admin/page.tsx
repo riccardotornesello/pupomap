@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
 import { PupoLocation } from "@/types"
-import { Plus, Pencil, Trash2, LogOut, MapPin, Upload } from "lucide-react"
+import { Plus, Pencil, Trash2, LogOut, MapPin, Upload, FileJson } from "lucide-react"
 
 const MapPicker = dynamic(() => import("@/components/admin/MapPicker"), {
   loading: () => <p>Caricamento mappa...</p>,
@@ -19,6 +19,7 @@ export default function AdminDashboard() {
   const [editingPupo, setEditingPupo] = useState<PupoLocation | null>(null)
   const [showMapPicker, setShowMapPicker] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [importing, setImporting] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -201,6 +202,52 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleJsonImport = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0]
+    if (!file || !adminPassword) return
+
+    setImporting(true)
+    try {
+      const text = await file.text()
+      const jsonData = JSON.parse(text)
+
+      // Support both array format and object with pupi property
+      const pupiToImport = Array.isArray(jsonData) ? jsonData : jsonData.pupi
+
+      if (!Array.isArray(pupiToImport)) {
+        alert("Formato JSON non valido. Atteso un array di pupi.")
+        return
+      }
+
+      const response = await fetch("/api/admin/seed", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": adminPassword,
+        },
+        body: JSON.stringify({ pupi: pupiToImport }),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        alert(result.message)
+        fetchPupi()
+      } else {
+        const error = await response.json()
+        alert(error.error || "Errore durante l'importazione")
+      }
+    } catch (error) {
+      console.error("Error importing JSON:", error)
+      alert("Errore durante l'importazione del file JSON")
+    } finally {
+      setImporting(false)
+      // Reset the file input
+      event.target.value = ""
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-stone-50 flex items-center justify-center">
@@ -239,17 +286,42 @@ export default function AdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Actions */}
-        <div className="mb-6 flex justify-between items-center">
+        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h2 className="text-2xl font-bold text-stone-900">
             Pupi ({pupi.length})
           </h2>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-          >
-            <Plus size={18} />
-            Aggiungi Pupo
-          </button>
+          <div className="flex gap-2 flex-wrap">
+            <label
+              htmlFor="json-import"
+              className={`flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer ${
+                importing ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              <FileJson size={18} />
+              <span className="hidden sm:inline">
+                {importing ? "Importazione..." : "Importa JSON"}
+              </span>
+              <span className="sm:hidden">
+                {importing ? "..." : "JSON"}
+              </span>
+            </label>
+            <input
+              id="json-import"
+              type="file"
+              accept=".json,application/json"
+              onChange={handleJsonImport}
+              disabled={importing}
+              className="hidden"
+            />
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <Plus size={18} />
+              <span className="hidden sm:inline">Aggiungi Pupo</span>
+              <span className="sm:hidden">Aggiungi</span>
+            </button>
+          </div>
         </div>
 
         {/* Form */}

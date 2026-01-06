@@ -7,6 +7,12 @@ import { eq } from "drizzle-orm"
 import { PupoLocation } from "@/types"
 import path from "path"
 import fs from "fs"
+import {
+  getDefaultSqlitePath,
+  isPostgresUrl,
+  isSqliteUrl,
+  parseSqliteUrl,
+} from "./db-config"
 
 // Database type definitions
 type SqliteDB = ReturnType<typeof drizzleSqlite<{ pupi: typeof pupi }>>
@@ -31,21 +37,18 @@ function initializeDatabaseConnection(): DatabaseConnection {
   if (!databaseUrl) {
     // Default to SQLite
     console.log("No DATABASE_URL found, using SQLite (data/pupi.db)")
-    const dataDir = path.join(process.cwd(), "data")
+    const dbPath = getDefaultSqlitePath()
+    const dataDir = path.dirname(dbPath)
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true })
     }
-    const dbPath = path.join(dataDir, "pupi.db")
     const sqlite = new Database(dbPath)
     sqlite.pragma("journal_mode = WAL")
     const db = drizzleSqlite(sqlite, { schema: { pupi } })
     return { db, isPostgres: false }
   }
 
-  if (
-    databaseUrl.startsWith("postgres://") ||
-    databaseUrl.startsWith("postgresql://")
-  ) {
+  if (isPostgresUrl(databaseUrl)) {
     console.log("Using PostgreSQL database")
     const queryClient = postgres(databaseUrl, {
       ssl:
@@ -57,9 +60,9 @@ function initializeDatabaseConnection(): DatabaseConnection {
     return { db, isPostgres: true }
   }
 
-  if (databaseUrl.startsWith("sqlite://") || databaseUrl.startsWith("file:")) {
+  if (isSqliteUrl(databaseUrl)) {
     console.log("Using SQLite database")
-    const dbPath = databaseUrl.replace(/^(sqlite:\/\/|file:)/, "")
+    const dbPath = parseSqliteUrl(databaseUrl)
     const sqlite = new Database(dbPath)
     sqlite.pragma("journal_mode = WAL")
     const db = drizzleSqlite(sqlite, { schema: { pupi } })

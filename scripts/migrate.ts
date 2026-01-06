@@ -7,6 +7,12 @@ import { migrate as migrateSqlite } from "drizzle-orm/better-sqlite3/migrator"
 import { migrate as migratePostgres } from "drizzle-orm/postgres-js/migrator"
 import path from "path"
 import fs from "fs"
+import {
+  getDefaultSqlitePath,
+  isPostgresUrl,
+  isSqliteUrl,
+  parseSqliteUrl,
+} from "../lib/db-config"
 
 async function runSqliteMigration(dbPath: string) {
   console.log("Using SQLite database")
@@ -27,19 +33,16 @@ async function runMigrations() {
   if (!databaseUrl) {
     // Default to SQLite
     console.log("No DATABASE_URL found, using SQLite (data/pupi.db)")
-    const dataDir = path.join(process.cwd(), "data")
+    const dbPath = getDefaultSqlitePath()
+    const dataDir = path.dirname(dbPath)
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true })
     }
-    const dbPath = path.join(dataDir, "pupi.db")
     await runSqliteMigration(dbPath)
     return
   }
 
-  if (
-    databaseUrl.startsWith("postgres://") ||
-    databaseUrl.startsWith("postgresql://")
-  ) {
+  if (isPostgresUrl(databaseUrl)) {
     console.log("Using PostgreSQL database")
     const queryClient = postgres(databaseUrl, {
       max: 1,
@@ -56,8 +59,8 @@ async function runMigrations() {
     return
   }
 
-  if (databaseUrl.startsWith("sqlite://") || databaseUrl.startsWith("file:")) {
-    const dbPath = databaseUrl.replace(/^(sqlite:\/\/|file:)/, "")
+  if (isSqliteUrl(databaseUrl)) {
+    const dbPath = parseSqliteUrl(databaseUrl)
     await runSqliteMigration(dbPath)
     return
   }

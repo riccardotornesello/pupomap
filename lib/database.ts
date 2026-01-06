@@ -43,7 +43,7 @@ class SQLiteAdapter implements DatabaseAdapter {
   }
 
   async getAllPupi(): Promise<PupoLocation[]> {
-    const stmt = this.db.prepare("SELECT * FROM pupi")
+    const stmt = this.db.prepare("SELECT * FROM pupi ORDER BY name ASC")
     return stmt.all() as PupoLocation[]
   }
 
@@ -147,7 +147,7 @@ class PostgreSQLAdapter implements DatabaseAdapter {
 
   async getAllPupi(): Promise<PupoLocation[]> {
     await this.initialize()
-    const result = await this.pool.query("SELECT * FROM pupi")
+    const result = await this.pool.query("SELECT * FROM pupi ORDER BY name ASC")
     return result.rows as PupoLocation[]
   }
 

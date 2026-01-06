@@ -38,7 +38,7 @@ interface MapControllerProps {
 const MapController: React.FC<MapControllerProps> = ({ center }) => {
   const map = useMap()
   useEffect(() => {
-    map.flyTo(center, 15, { duration: 1.5 })
+    map.setView(center, 15)
   }, [center, map])
   return null
 }

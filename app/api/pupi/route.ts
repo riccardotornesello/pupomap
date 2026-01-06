@@ -3,7 +3,7 @@ import { getAllPupi, createPupo } from "@/lib/db"
 
 export async function GET() {
   try {
-    const pupi = getAllPupi()
+    const pupi = await getAllPupi()
     return NextResponse.json(pupi)
   } catch (error) {
     console.error("Error fetching pupi:", error)
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const newPupo = createPupo({
+    const newPupo = await createPupo({
       name,
       description,
       lat: parsedLat,

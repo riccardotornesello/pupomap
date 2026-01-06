@@ -6,6 +6,23 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 - Node.js 20 or higher
 - A Google Cloud account with OAuth credentials
+- (Optional) PostgreSQL database or use SQLite (default)
+
+### Database Setup
+
+The application supports both PostgreSQL and SQLite databases:
+
+#### Using SQLite (Default)
+If no `DATABASE_URL` is configured, the application will automatically use SQLite with the database file stored at `data/pupi.db`. No additional setup required!
+
+#### Using PostgreSQL
+1. Set up a PostgreSQL database
+2. Configure the `DATABASE_URL` in your `.env.local`:
+   ```bash
+   DATABASE_URL=postgresql://user:password@localhost:5432/pupomap
+   ```
+
+The database schema will be automatically created on first run, and default data will be seeded if the database is empty.
 
 ### Setup Google OAuth
 
@@ -28,6 +45,7 @@ Before running the application, you need to set up Google OAuth credentials:
    - `NEXTAUTH_SECRET`: Generate a random secret using: `openssl rand -base64 32`
    - `NEXTAUTH_URL`: Keep as `http://localhost:3000` for local development
    - `ADMIN_PASSWORD`: Set a secure password for admin backoffice access
+   - `DATABASE_URL`: (Optional) Configure database connection. If not set, SQLite will be used by default
 
 ### Installation
 
@@ -77,7 +95,7 @@ The application includes an admin backoffice system for managing pupi:
   - View all pupi in a table format
   - **Choose pupo location by clicking on an interactive map**
   - **Upload images directly to Google Cloud Storage** (optional)
-- All changes are persisted to a JSON file in the `data/` directory
+- All changes are persisted to the configured database (SQLite or PostgreSQL)
 
 #### Image Upload Setup (Optional)
 

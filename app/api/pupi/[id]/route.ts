@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const pupo = getPupoById(id)
+    const pupo = await getPupoById(id)
 
     if (!pupo) {
       return NextResponse.json({ error: "Pupo not found" }, { status: 404 })
@@ -38,7 +38,7 @@ export async function PUT(
     const { id } = await params
     const body = await request.json()
 
-    const updatedPupo = updatePupo(id, body)
+    const updatedPupo = await updatePupo(id, body)
 
     if (!updatedPupo) {
       return NextResponse.json({ error: "Pupo not found" }, { status: 404 })
@@ -67,7 +67,7 @@ export async function DELETE(
     }
 
     const { id } = await params
-    const deleted = deletePupo(id)
+    const deleted = await deletePupo(id)
 
     if (!deleted) {
       return NextResponse.json({ error: "Pupo not found" }, { status: 404 })

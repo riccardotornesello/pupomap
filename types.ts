@@ -7,6 +7,7 @@ export interface PupoLocation {
   image: string
   artist: string
   theme: string // e.g., Satira Politica, Tradizionale, Fantasia
+  address?: string // Optional address field
 }
 
 export interface User {

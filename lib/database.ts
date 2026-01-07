@@ -42,7 +42,8 @@ class SQLiteAdapter implements DatabaseAdapter {
         lng REAL NOT NULL,
         image TEXT NOT NULL,
         artist TEXT NOT NULL,
-        theme TEXT NOT NULL
+        theme TEXT NOT NULL,
+        address TEXT
       );
 
       CREATE TABLE IF NOT EXISTS votes (
@@ -56,6 +57,13 @@ class SQLiteAdapter implements DatabaseAdapter {
       CREATE INDEX IF NOT EXISTS idx_votes_pupo_id ON votes(pupo_id);
       CREATE INDEX IF NOT EXISTS idx_votes_user_id ON votes(user_id);
     `)
+    
+    // Add address column if it doesn't exist (for existing databases)
+    try {
+      this.db.exec(`ALTER TABLE pupi ADD COLUMN address TEXT`)
+    } catch {
+      // Column already exists - safe to ignore for backwards compatibility
+    }
   }
 
   async getAllPupi(): Promise<PupoLocation[]> {
@@ -70,8 +78,8 @@ class SQLiteAdapter implements DatabaseAdapter {
 
   async createPupo(pupo: PupoLocation): Promise<PupoLocation> {
     const stmt = this.db.prepare(`
-      INSERT INTO pupi (name, description, lat, lng, image, artist, theme)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO pupi (name, description, lat, lng, image, artist, theme, address)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `)
     const result = stmt.run(
       pupo.name,
@@ -80,7 +88,8 @@ class SQLiteAdapter implements DatabaseAdapter {
       pupo.lng,
       pupo.image,
       pupo.artist,
-      pupo.theme
+      pupo.theme,
+      pupo.address || null
     )
     return { ...pupo, id: result.lastInsertRowid as number }
   }
@@ -95,7 +104,7 @@ class SQLiteAdapter implements DatabaseAdapter {
     const updatedPupo = { ...current, ...updates }
     const stmt = this.db.prepare(`
       UPDATE pupi
-      SET name = ?, description = ?, lat = ?, lng = ?, image = ?, artist = ?, theme = ?
+      SET name = ?, description = ?, lat = ?, lng = ?, image = ?, artist = ?, theme = ?, address = ?
       WHERE id = ?
     `)
     stmt.run(
@@ -106,6 +115,7 @@ class SQLiteAdapter implements DatabaseAdapter {
       updatedPupo.image,
       updatedPupo.artist,
       updatedPupo.theme,
+      updatedPupo.address || null,
       id
     )
     return updatedPupo
@@ -183,7 +193,8 @@ class PostgreSQLAdapter implements DatabaseAdapter {
           lng DOUBLE PRECISION NOT NULL,
           image TEXT NOT NULL,
           artist TEXT NOT NULL,
-          theme TEXT NOT NULL
+          theme TEXT NOT NULL,
+          address TEXT
         );
 
         CREATE TABLE IF NOT EXISTS votes (
@@ -197,6 +208,13 @@ class PostgreSQLAdapter implements DatabaseAdapter {
         CREATE INDEX IF NOT EXISTS idx_votes_pupo_id ON votes(pupo_id);
         CREATE INDEX IF NOT EXISTS idx_votes_user_id ON votes(user_id);
       `)
+      
+      // Add address column if it doesn't exist (for existing databases)
+      try {
+        await client.query(`ALTER TABLE pupi ADD COLUMN address TEXT`)
+      } catch {
+        // Column already exists - safe to ignore for backwards compatibility
+      }
 
       this.initialized = true
     } finally {
@@ -221,8 +239,8 @@ class PostgreSQLAdapter implements DatabaseAdapter {
   async createPupo(pupo: PupoLocation): Promise<PupoLocation> {
     await this.initialize()
     const result = await this.pool.query(
-      `INSERT INTO pupi (name, description, lat, lng, image, artist, theme)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO pupi (name, description, lat, lng, image, artist, theme, address)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id`,
       [
         pupo.name,
@@ -232,6 +250,7 @@ class PostgreSQLAdapter implements DatabaseAdapter {
         pupo.image,
         pupo.artist,
         pupo.theme,
+        pupo.address || null,
       ]
     )
     return { ...pupo, id: result.rows[0].id }
@@ -248,8 +267,8 @@ class PostgreSQLAdapter implements DatabaseAdapter {
     const updatedPupo = { ...current, ...updates }
     await this.pool.query(
       `UPDATE pupi
-       SET name = $1, description = $2, lat = $3, lng = $4, image = $5, artist = $6, theme = $7
-       WHERE id = $8`,
+       SET name = $1, description = $2, lat = $3, lng = $4, image = $5, artist = $6, theme = $7, address = $8
+       WHERE id = $9`,
       [
         updatedPupo.name,
         updatedPupo.description,
@@ -258,6 +277,7 @@ class PostgreSQLAdapter implements DatabaseAdapter {
         updatedPupo.image,
         updatedPupo.artist,
         updatedPupo.theme,
+        updatedPupo.address || null,
         id,
       ]
     )

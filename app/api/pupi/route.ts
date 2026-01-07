@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, description, lat, lng, image, artist, theme } = body
+    const { name, description, lat, lng, image, artist, theme, address } = body
 
     if (!name || !description || !lat || !lng || !image || !artist || !theme) {
       return NextResponse.json(
@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
       image,
       artist,
       theme,
+      address,
     })
 
     return NextResponse.json(newPupo, { status: 201 })

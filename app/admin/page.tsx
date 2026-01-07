@@ -19,6 +19,7 @@ export default function AdminDashboard() {
   const [editingPupo, setEditingPupo] = useState<PupoLocation | null>(null)
   const [showMapPicker, setShowMapPicker] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [geocoding, setGeocoding] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -27,6 +28,7 @@ export default function AdminDashboard() {
     image: "",
     artist: "",
     theme: "",
+    address: "",
   })
   const router = useRouter()
 
@@ -158,6 +160,7 @@ export default function AdminDashboard() {
       image: pupo.image,
       artist: pupo.artist,
       theme: pupo.theme,
+      address: pupo.address || "",
     })
     setShowForm(true)
   }
@@ -194,6 +197,7 @@ export default function AdminDashboard() {
       image: "",
       artist: "",
       theme: "",
+      address: "",
     })
     setEditingPupo(null)
     setShowForm(false)
@@ -206,6 +210,55 @@ export default function AdminDashboard() {
       lat: lat.toString(),
       lng: lng.toString(),
     })
+  }
+
+  const handleGeocodeAddress = async () => {
+    if (!formData.address.trim()) {
+      return
+    }
+
+    setGeocoding(true)
+    try {
+      // Using Nominatim (OpenStreetMap) API for geocoding
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          formData.address
+        )}&limit=1`,
+        {
+          headers: {
+            "User-Agent": "PupoMap-Admin/1.0 (https://github.com/riccardotornesello/pupomap)",
+          },
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`Errore nella geocodifica (HTTP ${response.status})`)
+      }
+
+      const data = await response.json()
+
+      if (data.length === 0) {
+        alert(
+          "Nessuna coordinata trovata per questo indirizzo. Prova con un indirizzo più specifico."
+        )
+        return
+      }
+
+      const { lat, lon } = data[0]
+      setFormData({
+        ...formData,
+        lat: lat,
+        lng: lon,
+      })
+      alert("Coordinate trovate! Verifica che siano corrette.")
+    } catch (error) {
+      console.error("Error geocoding address:", error)
+      const errorMessage =
+        error instanceof Error ? error.message : "Errore durante la conversione dell'indirizzo in coordinate"
+      alert(errorMessage)
+    } finally {
+      setGeocoding(false)
+    }
   }
 
   const handleImageUpload = async (
@@ -365,6 +418,39 @@ export default function AdminDashboard() {
                   rows={3}
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-2">
+                  Indirizzo
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) =>
+                      setFormData({ ...formData, address: e.target.value })
+                    }
+                    placeholder="Es: Piazza del Popolo, Roma, Italia"
+                    className="flex-1 px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleGeocodeAddress}
+                    disabled={geocoding || !formData.address.trim()}
+                    className={`px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
+                      geocoding || !formData.address.trim()
+                        ? "bg-stone-300 text-stone-500 cursor-not-allowed"
+                        : "bg-blue-600 text-white hover:bg-blue-700"
+                    }`}
+                  >
+                    {geocoding ? "Conversione..." : "→ Coordinate"}
+                  </button>
+                </div>
+                <p className="text-xs text-stone-500 mt-1">
+                  Opzionale: inserisci l&apos;indirizzo e clicca &quot;→
+                  Coordinate&quot; per convertirlo in coordinate geografiche
+                </p>
               </div>
 
               <div>

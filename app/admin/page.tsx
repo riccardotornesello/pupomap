@@ -447,8 +447,8 @@ export default function AdminDashboard() {
                   </button>
                 </div>
                 <p className="text-xs text-stone-500 mt-1">
-                  Opzionale: inserisci l'indirizzo e clicca "→ Coordinate" per
-                  convertirlo in coordinate geografiche
+                  Opzionale: inserisci l&apos;indirizzo e clicca &quot;→
+                  Coordinate&quot; per convertirlo in coordinate geografiche
                 </p>
               </div>
 

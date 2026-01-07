@@ -61,7 +61,7 @@ class SQLiteAdapter implements DatabaseAdapter {
     // Add address column if it doesn't exist (for existing databases)
     try {
       this.db.exec(`ALTER TABLE pupi ADD COLUMN address TEXT`)
-    } catch (error) {
+    } catch {
       // Column already exists, ignore error
     }
   }
@@ -212,7 +212,7 @@ class PostgreSQLAdapter implements DatabaseAdapter {
       // Add address column if it doesn't exist (for existing databases)
       try {
         await client.query(`ALTER TABLE pupi ADD COLUMN address TEXT`)
-      } catch (error) {
+      } catch {
         // Column already exists, ignore error
       }
 

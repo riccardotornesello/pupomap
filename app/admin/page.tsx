@@ -214,7 +214,6 @@ export default function AdminDashboard() {
 
   const handleGeocodeAddress = async () => {
     if (!formData.address.trim()) {
-      alert("Inserisci un indirizzo per convertirlo in coordinate")
       return
     }
 
@@ -227,13 +226,13 @@ export default function AdminDashboard() {
         )}&limit=1`,
         {
           headers: {
-            "User-Agent": "PupoMap-Admin",
+            "User-Agent": "PupoMap-Admin/1.0 (https://github.com/riccardotornesello/pupomap)",
           },
         }
       )
 
       if (!response.ok) {
-        throw new Error("Errore nella geocodifica")
+        throw new Error(`Errore nella geocodifica (HTTP ${response.status})`)
       }
 
       const data = await response.json()
@@ -254,7 +253,9 @@ export default function AdminDashboard() {
       alert("Coordinate trovate! Verifica che siano corrette.")
     } catch (error) {
       console.error("Error geocoding address:", error)
-      alert("Errore durante la conversione dell'indirizzo in coordinate")
+      const errorMessage =
+        error instanceof Error ? error.message : "Errore durante la conversione dell'indirizzo in coordinate"
+      alert(errorMessage)
     } finally {
       setGeocoding(false)
     }

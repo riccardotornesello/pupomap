@@ -62,7 +62,7 @@ class SQLiteAdapter implements DatabaseAdapter {
     try {
       this.db.exec(`ALTER TABLE pupi ADD COLUMN address TEXT`)
     } catch {
-      // Column already exists, ignore error
+      // Column already exists - safe to ignore for backwards compatibility
     }
   }
 
@@ -213,7 +213,7 @@ class PostgreSQLAdapter implements DatabaseAdapter {
       try {
         await client.query(`ALTER TABLE pupi ADD COLUMN address TEXT`)
       } catch {
-        // Column already exists, ignore error
+        // Column already exists - safe to ignore for backwards compatibility
       }
 
       this.initialized = true
